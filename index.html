@@ -22,11 +22,19 @@
     .name-col-aktivny { background-color: #f0f0f0 !important; color: #1a3a6b !important; font-weight: bold !important; }
     .turnus-den { font-weight: bold; }
 
-    /* ===== NADPIS – BEZ ZALAMOVANIA ===== */
+    /* ===== SPOLOČNÝ WRAPPER – šírka podľa tabuľky ===== */
+    .obsah-wrap {
+        width: max-content;       /* presne taká šírka, akú má tabuľka */
+        max-width: 100%;          /* nepresiahne okno */
+        box-sizing: border-box;
+    }
+
+    /* ===== NADPIS – rovnaká šírka ako tabuľka, bez posuvníka ===== */
     h2#mesiacNadpis {
-        white-space: nowrap;
-        overflow-x: auto;
+        white-space: nowrap;      /* nezalomí sa */
         margin: 0 0 12px 0;
+        width: 100%;              /* vyplní šírku wrappera (= tabuľky) */
+        box-sizing: border-box;
     }
 
     /* ===== JEDNA NOČNÁ – colspan 2, O v strede (50 %) ===== */
@@ -113,7 +121,7 @@
         padding-right: 0;
     }
 
-    /* ===== NAVIGÁCIA – BEZ ZALAMOVANIA ===== */
+    /* ===== NAVIGÁCIA – bez posuvníka, rovnaká šírka ===== */
     .nav-tlacidla {
         display: flex;
         align-items: center;
@@ -121,7 +129,8 @@
         margin-bottom: 15px;
         flex-wrap: nowrap;
         white-space: nowrap;
-        overflow-x: auto;
+        width: 100%;
+        box-sizing: border-box;
     }
     .nav-tlacidla button {
         background-color: #4a90d9; color: white; border: none; padding: 8px 16px;
@@ -138,13 +147,7 @@
         flex-shrink: 0;
     }
 
-    /* ===== WRAPPER, ktorý sa prispôsobí šírke tabuľky ===== */
-    .obsah-wrap {
-        display: inline-block;   /* šírka podľa obsahu (tabuľky) */
-        max-width: 100%;
-    }
-
-    /* ===== INFO BOX – rovnaká šírka ako tabuľka ===== */
+    /* ===== INFO BOX – rovnaká šírka ako tabuľka, bez posuvníka ===== */
     .info-dnes {
         background-color: #fff3b0;
         border-left: 4px solid #f0c419;
@@ -154,10 +157,9 @@
         font-size: 13px;
         color: #333;
         line-height: 1.5;
-        white-space: nowrap;      /* text sa nezalomí */
-        overflow-x: auto;         /* pri úzkom okne sa dá posúvať */
-        box-sizing: border-box;   /* padding sa počíta do šírky */
+        white-space: nowrap;      /* nezalomí sa */
         width: 100%;              /* vyplní šírku wrappera (= tabuľky) */
+        box-sizing: border-box;
     }
     .info-dnes .info-datum { font-size: 14px; font-weight: bold; color: #2a5f94; margin-bottom: 4px; }
     .info-dnes .info-mena { font-weight: bold; color: #1a3a6b; }
@@ -168,22 +170,24 @@
 </style>
 <body>
 
-<h2 id="mesiacNadpis">Tabuľka mesiaca</h2>
-
-<div class="nav-tlacidla">
-    <button id="btnPredchadzajuci">◄ Predchádzajúci</button>
-    <span class="aktualny-mesiac" id="aktualnyMesiac"></span>
-    <button id="btnNasledujuci">Nasledujúci ►</button>
-</div>
-
-<!-- WRAPPER obopína info box + tabuľku, aby mali spoločnú šírku -->
+<!-- WRAPPER obopína nadpis, navigáciu, info box aj tabuľku -->
 <div class="obsah-wrap">
+
+    <h2 id="mesiacNadpis">Tabuľka mesiaca</h2>
+
+    <div class="nav-tlacidla">
+        <button id="btnPredchadzajuci">◄ Predchádzajúci</button>
+        <span class="aktualny-mesiac" id="aktualnyMesiac"></span>
+        <button id="btnNasledujuci">Nasledujúci ►</button>
+    </div>
+
     <div id="infoDnes" class="info-dnes"></div>
 
     <table id="tabulkaMesiaca">
         <thead><tr id="hlavicka"></tr></thead>
         <tbody id="telo"></tbody>
     </table>
+
 </div>
 
 <script>
