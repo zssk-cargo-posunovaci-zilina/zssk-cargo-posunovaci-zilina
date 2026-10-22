@@ -105,14 +105,31 @@
         padding-left: 0;
         padding-right: 0;
     }
-    .nav-tlacidla { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
+
+    /* ===== NAVIGÁCIA – BEZ ZALAMOVANIA ===== */
+    .nav-tlacidla {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 15px;
+        flex-wrap: nowrap;       /* nezalamovať */
+        white-space: nowrap;     /* text ani tlačidlá sa nezalomí */
+    }
     .nav-tlacidla button {
         background-color: #4a90d9; color: white; border: none; padding: 8px 16px;
-        font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background-color 0.2s;
+        font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer;
+        transition: background-color 0.2s;
+        white-space: nowrap;     /* text na tlačidle sa nezalomí */
+        flex-shrink: 0;          /* tlačidlo sa nezmenší */
     }
     .nav-tlacidla button:hover { background-color: #357abd; }
     .nav-tlacidla button:active { background-color: #2a5f94; }
-    .nav-tlacidla .aktualny-mesiac { font-size: 14px; color: #333; font-weight: bold; }
+    .nav-tlacidla .aktualny-mesiac {
+        font-size: 14px; color: #333; font-weight: bold;
+        white-space: nowrap;     /* názov mesiaca sa nezalomí */
+        flex-shrink: 0;
+    }
+
     .info-dnes {
         background-color: #fff3b0; border-left: 4px solid #f0c419; padding: 10px 14px;
         margin-bottom: 15px; border-radius: 4px; font-size: 13px; color: #333; line-height: 1.5;
@@ -239,12 +256,10 @@
             && den === dnes.getDate();
     }
 
-    // ===== JE ZOBRAZENÝ AKTUÁLNY MESIAC =====
     function jeAktualnyMesiac() {
         return zobrazenyRok === dnes.getFullYear() && zobrazenyMesiac === dnes.getMonth();
     }
 
-    // ===== AKTUALIZÁCIA VIDITEĽNOSTI TLAČIDLA "PREDCHÁDZAJÚCI" =====
     function aktualizujTlacidloPredchadzajuci() {
         const btn = document.getElementById("btnPredchadzajuci");
         if (jeAktualnyMesiac()) {
@@ -254,7 +269,6 @@
         }
     }
 
-    // ===== POMOCNÁ: dynamické zvýraznenie "dnes" v colspan bunke =====
     function nastavDnesZvyraznenie(td, startDen, endDen) {
         if (!(dnes.getFullYear() === zobrazenyRok && dnes.getMonth() === zobrazenyMesiac)) return;
         const dnesDen = dnes.getDate();
@@ -279,7 +293,6 @@
         td.style.backgroundColor = "transparent";
     }
 
-    // ===== JSONP načítanie =====
     function nacitajZmenyZoSheets() {
         return new Promise((resolve) => {
             const callbackName = "jsonpCb_" + Date.now();
@@ -340,7 +353,6 @@
         });
     }
 
-    // ===== POST cez skrytý iframe =====
     function ulozZmenuDoSheets(datum, meno, den, novyZnak) {
         const form = document.createElement("form");
         form.method = "POST";
@@ -361,7 +373,6 @@
         console.log("POST odoslaný:", polia);
     }
 
-    // ===== INFO BOX =====
     function aktualizujInfoDnes() {
         const infoDiv = document.getElementById("infoDnes");
         const den = dnes.getDate();
@@ -388,7 +399,6 @@
     function vykresliTabulku() {
         console.log("Vykresľujem tabuľku, zmien v DB:", zmenyDatabaza.length);
 
-        // Aktualizuj viditeľnosť tlačidla "Predchádzajúci"
         aktualizujTlacidloPredchadzajuci();
 
         const pocetDni = new Date(zobrazenyRok, zobrazenyMesiac + 1, 0).getDate();
@@ -530,7 +540,6 @@
         aktualizujInfoDnes();
     }
 
-    // ===== KLIK =====
     function pridelKlikHandler(td, clen, den, aktualnyZnak) {
         const datumStr = datumString(zobrazenyRok, zobrazenyMesiac, den);
 
@@ -643,7 +652,6 @@
         });
     }
 
-    // ===== NAVIGÁCIA =====
     document.getElementById("btnPredchadzajuci").addEventListener("click", () => {
         zobrazenyMesiac--;
         if (zobrazenyMesiac < 0) { zobrazenyMesiac = 11; zobrazenyRok--; }
@@ -655,7 +663,6 @@
         vykresliTabulku();
     });
 
-    // ===== ŠTART =====
     document.addEventListener("DOMContentLoaded", () => {
         nacitajZmenyZoSheets().then(() => {
             vykresliTabulku();
