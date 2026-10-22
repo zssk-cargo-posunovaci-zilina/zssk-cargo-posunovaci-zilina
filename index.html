@@ -3,127 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZSSK Cargo - posunovači Žilina</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        table { border-collapse: collapse; font-size: 12px; }
-        th, td {
-            border: 1px solid #ccc; padding: 0; text-align: center;
-            vertical-align: middle; min-width: 30px; height: 28px;
-        }
-        th { background-color: #4a90d9; color: white; font-weight: bold; }
-        th.weekend-header { background-color: #d9534f; }
-        th.dnes-stlpec-hlavicka { background-color: #f0c419 !important; color: #000 !important; }
-        td.dnes-stlpec { background-color: #fff3b0 !important; }
-        .name-col {
-            background-color: #f0f0f0; text-align: left; font-weight: normal;
-            min-width: 140px; color: #666; padding: 0 6px;
-        }
-        th.name-col { background-color: #f0f0f0 !important; color: #666 !important; font-weight: normal !important; }
-        .name-col-aktivny { background-color: #f0f0f0 !important; color: #1a3a6b !important; font-weight: bold !important; }
-        .turnus-den { font-weight: bold; }
+    <title>ZSSK Cargo - posunovači Žilina</title><style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    table { border-collapse: collapse; font-size: 12px; }
+    th, td {
+        border: 1px solid #ccc; padding: 0; text-align: center;
+        vertical-align: middle; min-width: 30px; height: 28px;
+    }
+    th { background-color: #4a90d9; color: white; font-weight: bold; }
+    th.weekend-header { background-color: #d9534f; }
+    th.dnes-stlpec-hlavicka { background-color: #f0c419 !important; color: #000 !important; }
+    td.dnes-stlpec { background-color: #fff3b0 !important; }
+    .name-col {
+        background-color: #f0f0f0; text-align: left; font-weight: normal;
+        min-width: 140px; color: #666; padding: 0 6px;
+    }
+    th.name-col { background-color: #f0f0f0 !important; color: #666 !important; font-weight: normal !important; }
+    .name-col-aktivny { background-color: #f0f0f0 !important; color: #1a3a6b !important; font-weight: bold !important; }
+    .turnus-den { font-weight: bold; }
 
-        /* ===== JEDNA NOČNÁ – colspan 2, O v strede (50 %) ===== */
-        .turnus-O-single {
-            background-color: #ffffff;
-            color: #000;
-            font-weight: bold;
-            position: relative;
-            text-align: center;
-        }
-        .turnus-O-single::before {
-            content: "O";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-weight: bold;
-            color: #000;
-            pointer-events: none;
-            line-height: 1;
-            z-index: 1;
-        }
-        .turnus-O-single::after {
-            content: "";
-            position: absolute;
-            top: 0; bottom: 0;
-            left: 50%;
-            width: 1px;
-            background-color: #ccc;
-            transform: translateX(-50%);
-            pointer-events: none;
-            opacity: 1;
-            z-index: 1;
-        }
+    /* ===== JEDNA NOČNÁ – colspan 2, O v strede (50 %) ===== */
+    .turnus-O-single {
+        background-color: #ffffff;
+        color: #000;
+        font-weight: bold;
+        position: relative;
+        text-align: center;
+    }
+    .turnus-O-single::before {
+        content: "O";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-weight: bold;
+        color: #000;
+        pointer-events: none;
+        line-height: 1;
+        z-index: 2;              /* text NAD čiarou */
+    }
+    .turnus-O-single::after {
+        content: "";
+        position: absolute;
+        top: 0; bottom: 0;
+        left: 50%;
+        width: 1px;
+        background-color: #ccc;
+        transform: translateX(-50%);
+        pointer-events: none;
+        opacity: 1;
+        z-index: 1;              /* čiara POD textom */
+    }
 
-        /* ===== DVE NOČNÉ PO SEBE – colspan 3 =====
-           O na 33,33 % a 66,66 %, zvislé čiary na tých istých pozíciách */
-        .turnus-OO {
-            background-color: #ffffff;
-            color: #000;
-            font-weight: bold;
-            position: relative;
-            text-align: center;
-            background-image: linear-gradient(to right,
-                transparent 0, transparent calc(33.333% - 0.5px),
-                #ccc calc(33.333% - 0.5px), #ccc calc(33.333% + 0.5px),
-                transparent calc(33.333% + 0.5px), transparent calc(66.666% - 0.5px),
-                #ccc calc(66.666% - 0.5px), #ccc calc(66.666% + 0.5px),
-                transparent calc(66.666% + 0.5px), transparent 100%);
-            background-repeat: no-repeat;
-            background-size: 100% 100%;
-        }
-        .turnus-OO::before {
-            content: "O";
-            position: absolute;
-            top: 50%;
-            left: 33.333%;
-            transform: translate(-50%, -50%);
-            font-weight: bold;
-            color: #000;
-            pointer-events: none;
-            line-height: 1;
-            z-index: 1;
-        }
-        .turnus-OO::after {
-            content: "O";
-            position: absolute;
-            top: 50%;
-            left: 66.666%;
-            transform: translate(-50%, -50%);
-            font-weight: bold;
-            color: #000;
-            pointer-events: none;
-            line-height: 1;
-            z-index: 1;
-        }
+    /* ===== DVE NOČNÉ PO SEBE – colspan 3 =====
+       O na 33,33 % a 66,66 %, zvislé čiary na tých istých pozíciách */
+    .turnus-OO {
+        background-color: #ffffff;
+        color: #000;
+        font-weight: bold;
+        position: relative;
+        text-align: center;
+        background-image: linear-gradient(to right,
+            transparent 0, transparent calc(33.333% - 0.5px),
+            #ccc calc(33.333% - 0.5px), #ccc calc(33.333% + 0.5px),
+            transparent calc(33.333% + 0.5px), transparent calc(66.666% - 0.5px),
+            #ccc calc(66.666% - 0.5px), #ccc calc(66.666% + 0.5px),
+            transparent calc(66.666% + 0.5px), transparent 100%);
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+    }
+    .turnus-OO::before {
+        content: "O";
+        position: absolute;
+        top: 50%;
+        left: 33.333%;
+        transform: translate(-50%, -50%);
+        font-weight: bold;
+        color: #000;
+        pointer-events: none;
+        line-height: 1;
+        z-index: 2;              /* text NAD čiarou */
+    }
+    .turnus-OO::after {
+        content: "O";
+        position: absolute;
+        top: 50%;
+        left: 66.666%;
+        transform: translate(-50%, -50%);
+        font-weight: bold;
+        color: #000;
+        pointer-events: none;
+        line-height: 1;
+        z-index: 2;              /* text NAD čiarou */
+    }
 
-        .turnus-C { background-color: #ffffff; color: #000; font-weight: bold; text-align: right; padding-right: 2px; }
-        .turnus-C-rev {
-            background-color: #ffffff;
-            color: #000;
-            font-weight: bold;
-            text-align: left;
-            padding-left: 0;
-            padding-right: 0;
-        }
-        .nav-tlacidla { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
-        .nav-tlacidla button {
-            background-color: #4a90d9; color: white; border: none; padding: 8px 16px;
-            font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background-color 0.2s;
-        }
-        .nav-tlacidla button:hover { background-color: #357abd; }
-        .nav-tlacidla button:active { background-color: #2a5f94; }
-        .nav-tlacidla .aktualny-mesiac { font-size: 14px; color: #333; font-weight: bold; }
-        .info-dnes {
-            background-color: #fff3b0; border-left: 4px solid #f0c419; padding: 10px 14px;
-            margin-bottom: 15px; border-radius: 4px; font-size: 13px; color: #333; line-height: 1.5;
-        }
-        .info-dnes .info-datum { font-size: 14px; font-weight: bold; color: #2a5f94; margin-bottom: 4px; }
-        .info-dnes .info-mena { font-weight: bold; color: #1a3a6b; }
-        .info-dnes .info-ziadne { font-style: italic; color: #999; }
-    </style>
-</head>
+    .turnus-C { background-color: #ffffff; color: #000; font-weight: bold; text-align: right; padding-right: 2px; }
+    .turnus-C-rev {
+        background-color: #ffffff;
+        color: #000;
+        font-weight: bold;
+        text-align: left;
+        padding-left: 0;
+        padding-right: 0;
+    }
+    .nav-tlacidla { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
+    .nav-tlacidla button {
+        background-color: #4a90d9; color: white; border: none; padding: 8px 16px;
+        font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background-color 0.2s;
+    }
+    .nav-tlacidla button:hover { background-color: #357abd; }
+    .nav-tlacidla button:active { background-color: #2a5f94; }
+    .nav-tlacidla .aktualny-mesiac { font-size: 14px; color: #333; font-weight: bold; }
+    .info-dnes {
+        background-color: #fff3b0; border-left: 4px solid #f0c419; padding: 10px 14px;
+        margin-bottom: 15px; border-radius: 4px; font-size: 13px; color: #333; line-height: 1.5;
+    }
+    .info-dnes .info-datum { font-size: 14px; font-weight: bold; color: #2a5f94; margin-bottom: 4px; }
+    .info-dnes .info-mena { font-weight: bold; color: #1a3a6b; }
+    .info-dnes .info-ziadne { font-style: italic; color: #999; }
+</style>
 <body>
 
 <h2 id="mesiacNadpis">Tabuľka mesiaca</h2>
