@@ -24,8 +24,8 @@
 
     /* ===== NADPIS – BEZ ZALAMOVANIA ===== */
     h2#mesiacNadpis {
-        white-space: nowrap;      /* nadpis sa nezalomí */
-        overflow-x: auto;         /* pri úzkom okne sa dá posúvať */
+        white-space: nowrap;
+        overflow-x: auto;
         margin: 0 0 12px 0;
     }
 
@@ -121,7 +121,7 @@
         margin-bottom: 15px;
         flex-wrap: nowrap;
         white-space: nowrap;
-        overflow-x: auto;         /* pri úzkom okne sa dá posúvať */
+        overflow-x: auto;
     }
     .nav-tlacidla button {
         background-color: #4a90d9; color: white; border: none; padding: 8px 16px;
@@ -138,12 +138,26 @@
         flex-shrink: 0;
     }
 
-    /* ===== INFO BOX – BEZ ZALAMOVANIA ===== */
+    /* ===== WRAPPER, ktorý sa prispôsobí šírke tabuľky ===== */
+    .obsah-wrap {
+        display: inline-block;   /* šírka podľa obsahu (tabuľky) */
+        max-width: 100%;
+    }
+
+    /* ===== INFO BOX – rovnaká šírka ako tabuľka ===== */
     .info-dnes {
-        background-color: #fff3b0; border-left: 4px solid #f0c419; padding: 10px 14px;
-        margin-bottom: 15px; border-radius: 4px; font-size: 13px; color: #333; line-height: 1.5;
-        white-space: nowrap;      /* text v boxe sa nezalomí */
+        background-color: #fff3b0;
+        border-left: 4px solid #f0c419;
+        padding: 10px 14px;
+        margin-bottom: 15px;
+        border-radius: 4px;
+        font-size: 13px;
+        color: #333;
+        line-height: 1.5;
+        white-space: nowrap;      /* text sa nezalomí */
         overflow-x: auto;         /* pri úzkom okne sa dá posúvať */
+        box-sizing: border-box;   /* padding sa počíta do šírky */
+        width: 100%;              /* vyplní šírku wrappera (= tabuľky) */
     }
     .info-dnes .info-datum { font-size: 14px; font-weight: bold; color: #2a5f94; margin-bottom: 4px; }
     .info-dnes .info-mena { font-weight: bold; color: #1a3a6b; }
@@ -162,12 +176,15 @@
     <button id="btnNasledujuci">Nasledujúci ►</button>
 </div>
 
-<div id="infoDnes" class="info-dnes"></div>
+<!-- WRAPPER obopína info box + tabuľku, aby mali spoločnú šírku -->
+<div class="obsah-wrap">
+    <div id="infoDnes" class="info-dnes"></div>
 
-<table id="tabulkaMesiaca">
-    <thead><tr id="hlavicka"></tr></thead>
-    <tbody id="telo"></tbody>
-</table>
+    <table id="tabulkaMesiaca">
+        <thead><tr id="hlavicka"></tr></thead>
+        <tbody id="telo"></tbody>
+    </table>
+</div>
 
 <script>
     // ===== KONFIGURÁCIA =====
