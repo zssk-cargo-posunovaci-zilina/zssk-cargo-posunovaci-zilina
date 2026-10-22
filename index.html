@@ -40,7 +40,7 @@
         color: #000;
         pointer-events: none;
         line-height: 1;
-        z-index: 2;              /* text NAD čiarou */
+        z-index: 2;
     }
     .turnus-O-single::after {
         content: "";
@@ -52,11 +52,10 @@
         transform: translateX(-50%);
         pointer-events: none;
         opacity: 1;
-        z-index: 1;              /* čiara POD textom */
+        z-index: 1;
     }
 
-    /* ===== DVE NOČNÉ PO SEBE – colspan 3 =====
-       O na 33,33 % a 66,66 %, zvislé čiary na tých istých pozíciách */
+    /* ===== DVE NOČNÉ PO SEBE – colspan 3 ===== */
     .turnus-OO {
         background-color: #ffffff;
         color: #000;
@@ -82,7 +81,7 @@
         color: #000;
         pointer-events: none;
         line-height: 1;
-        z-index: 2;              /* text NAD čiarou */
+        z-index: 2;
     }
     .turnus-OO::after {
         content: "O";
@@ -94,7 +93,7 @@
         color: #000;
         pointer-events: none;
         line-height: 1;
-        z-index: 2;              /* text NAD čiarou */
+        z-index: 2;
     }
 
     .turnus-C { background-color: #ffffff; color: #000; font-weight: bold; text-align: right; padding-right: 2px; }
@@ -121,6 +120,9 @@
     .info-dnes .info-datum { font-size: 14px; font-weight: bold; color: #2a5f94; margin-bottom: 4px; }
     .info-dnes .info-mena { font-weight: bold; color: #1a3a6b; }
     .info-dnes .info-ziadne { font-style: italic; color: #999; }
+
+    /* Skrytie tlačidla */
+    .skryte { display: none !important; }
 </style>
 <body>
 
@@ -213,7 +215,6 @@
         );
     }
 
-    // Pôvodný znak z cyklu (bez manuálnych zmien)
     function znakPreDen(clen, rok, mesiac, den) {
         const delta = dniMedzi(KOTVA_ROK, KOTVA_MESIAC, KOTVA_DEN, rok, mesiac, den);
         let idx = (KOTVA_INDEX - clen.posun + delta) % DLZKA_CYKLU;
@@ -221,7 +222,6 @@
         return TURNUS[idx];
     }
 
-    // Efektívny znak – manuálna zmena má prednosť, inak cyklus
     function efektivnyZnak(clen, rok, mesiac, den) {
         const zmena = najdiManualnuZmenu(clen.meno, rok, mesiac, den);
         if (zmena) return zmena.novyZnak;
@@ -237,6 +237,21 @@
         return rok === dnes.getFullYear()
             && mesiac === dnes.getMonth()
             && den === dnes.getDate();
+    }
+
+    // ===== JE ZOBRAZENÝ AKTUÁLNY MESIAC =====
+    function jeAktualnyMesiac() {
+        return zobrazenyRok === dnes.getFullYear() && zobrazenyMesiac === dnes.getMonth();
+    }
+
+    // ===== AKTUALIZÁCIA VIDITEĽNOSTI TLAČIDLA "PREDCHÁDZAJÚCI" =====
+    function aktualizujTlacidloPredchadzajuci() {
+        const btn = document.getElementById("btnPredchadzajuci");
+        if (jeAktualnyMesiac()) {
+            btn.classList.add("skryte");
+        } else {
+            btn.classList.remove("skryte");
+        }
     }
 
     // ===== POMOCNÁ: dynamické zvýraznenie "dnes" v colspan bunke =====
@@ -373,6 +388,9 @@
     function vykresliTabulku() {
         console.log("Vykresľujem tabuľku, zmien v DB:", zmenyDatabaza.length);
 
+        // Aktualizuj viditeľnosť tlačidla "Predchádzajúci"
+        aktualizujTlacidloPredchadzajuci();
+
         const pocetDni = new Date(zobrazenyRok, zobrazenyMesiac + 1, 0).getDate();
 
         document.getElementById("mesiacNadpis").textContent =
@@ -425,13 +443,11 @@
 
             let d = 1;
             while (d <= pocetDni) {
-                // Efektívny znak – manuálna zmena má prednosť
                 const znak = efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, d);
                 const datum = new Date(zobrazenyRok, zobrazenyMesiac, d);
                 const denTyzna = datum.getDay();
                 const td = document.createElement("td");
 
-                // ===== PRESAH Z MINULÉHO MESIACA (Ↄ) =====
                 if (d === 1 && presahZMinuleho) {
                     td.textContent = "Ↄ";
                     td.classList.add("turnus-C-rev");
@@ -443,7 +459,6 @@
                     continue;
                 }
 
-                // ===== KONIEC MESIACA (C) =====
                 if (d === pocetDni && znak === "O") {
                     td.textContent = "C";
                     td.classList.add("turnus-C");
@@ -455,14 +470,12 @@
                     continue;
                 }
 
-                // ===== NOČNÁ (O) =====
                 if (znak === "O") {
                     const dalsiDen = d + 1;
                     const dalsiZnak = (dalsiDen <= pocetDni)
                         ? efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, dalsiDen)
                         : null;
 
-                    // DVE NOČNÉ PO SEBE → colspan 3
                     if (dalsiZnak === "O" && d + 2 <= pocetDni) {
                         td.colSpan = 3;
                         td.classList.add("turnus-OO");
@@ -475,7 +488,6 @@
                         continue;
                     }
 
-                    // JEDNA NOČNÁ → colspan 2
                     td.colSpan = 2;
                     td.classList.add("turnus-O-single");
                     td.textContent = "";
@@ -487,7 +499,6 @@
                     continue;
                 }
 
-                // ===== PRÁZDNE / POMLČKA =====
                 if (znak === "-" || znak === "" || znak == null) {
                     td.textContent = "";
                     if (jeDnes(zobrazenyRok, zobrazenyMesiac, d)) td.classList.add("dnes-stlpec");
@@ -497,7 +508,6 @@
                     continue;
                 }
 
-                // ===== OSTATNÉ ZNAKY (I, /, D, J) =====
                 if (znak === "/" && DNI_BEZ_SIKMOVEJ.includes(denTyzna)) {
                     td.textContent = "";
                     if (jeDnes(zobrazenyRok, zobrazenyMesiac, d)) td.classList.add("dnes-stlpec");
@@ -554,7 +564,6 @@
         });
     }
 
-    // ===== KLIK pre colspan 2 (jedna nočná) =====
     function pridelKlikHandlerPreSingle(td, clen, den1, den2) {
         td.style.cursor = "pointer";
         td.title = (td.title ? td.title + " | " : "") +
@@ -593,7 +602,6 @@
         });
     }
 
-    // ===== KLIK pre colspan 3 (dve nočné) =====
     function pridelKlikHandlerPreOO(td, clen, den1, den2, den3) {
         td.style.cursor = "pointer";
         td.title = (td.title ? td.title + " | " : "") +
