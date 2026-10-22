@@ -22,6 +22,13 @@
     .name-col-aktivny { background-color: #f0f0f0 !important; color: #1a3a6b !important; font-weight: bold !important; }
     .turnus-den { font-weight: bold; }
 
+    /* ===== NADPIS – BEZ ZALAMOVANIA ===== */
+    h2#mesiacNadpis {
+        white-space: nowrap;      /* nadpis sa nezalomí */
+        overflow-x: auto;         /* pri úzkom okne sa dá posúvať */
+        margin: 0 0 12px 0;
+    }
+
     /* ===== JEDNA NOČNÁ – colspan 2, O v strede (50 %) ===== */
     .turnus-O-single {
         background-color: #ffffff;
@@ -112,27 +119,31 @@
         align-items: center;
         gap: 12px;
         margin-bottom: 15px;
-        flex-wrap: nowrap;       /* nezalamovať */
-        white-space: nowrap;     /* text ani tlačidlá sa nezalomí */
+        flex-wrap: nowrap;
+        white-space: nowrap;
+        overflow-x: auto;         /* pri úzkom okne sa dá posúvať */
     }
     .nav-tlacidla button {
         background-color: #4a90d9; color: white; border: none; padding: 8px 16px;
         font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer;
         transition: background-color 0.2s;
-        white-space: nowrap;     /* text na tlačidle sa nezalomí */
-        flex-shrink: 0;          /* tlačidlo sa nezmenší */
+        white-space: nowrap;
+        flex-shrink: 0;
     }
     .nav-tlacidla button:hover { background-color: #357abd; }
     .nav-tlacidla button:active { background-color: #2a5f94; }
     .nav-tlacidla .aktualny-mesiac {
         font-size: 14px; color: #333; font-weight: bold;
-        white-space: nowrap;     /* názov mesiaca sa nezalomí */
+        white-space: nowrap;
         flex-shrink: 0;
     }
 
+    /* ===== INFO BOX – BEZ ZALAMOVANIA ===== */
     .info-dnes {
         background-color: #fff3b0; border-left: 4px solid #f0c419; padding: 10px 14px;
         margin-bottom: 15px; border-radius: 4px; font-size: 13px; color: #333; line-height: 1.5;
+        white-space: nowrap;      /* text v boxe sa nezalomí */
+        overflow-x: auto;         /* pri úzkom okne sa dá posúvať */
     }
     .info-dnes .info-datum { font-size: 14px; font-weight: bold; color: #2a5f94; margin-bottom: 4px; }
     .info-dnes .info-mena { font-weight: bold; color: #1a3a6b; }
