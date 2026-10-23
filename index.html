@@ -1029,17 +1029,28 @@
         nacitavaSa = true;
         cakajuciRefresh = false;
         if (!silent) zobrazLoading(true);
-
+    
         const mojeCislo = ++pocitadloPoziadaviek;
-
-        return Promise.all([
-            nacitajZmenyZoSheets(),
-            nacitajNovychClenovZoSheets()
-        ])
+    
+        // POZOR: voláme POSTUPNE, nie Promise.all – Google Apps Script
+        // nezvládne dve súbežné JSONP požiadavky spoľahlivo.
+        return nacitajZmenyZoSheets()
+            .then(() => {
+                // malá pauza, aby Apps Script stihol dokončiť prvú požiadavku
+                return new Promise(r => setTimeout(r, 300));
+            })
+            .then(() => nacitajNovychClenovZoSheets())
             .then(() => {
                 if (mojeCislo !== pocitadloPoziadaviek) return;
                 vykresliTabulku();
                 vykresliNovuTabulku();
+            })
+            .catch((err) => {
+                console.error("Chyba pri načítaní:", err);
+                if (mojeCislo === pocitadloPoziadaviek) {
+                    vykresliTabulku();
+                    vykresliNovuTabulku();
+                }
             })
             .finally(() => {
                 nacitavaSa = false;
