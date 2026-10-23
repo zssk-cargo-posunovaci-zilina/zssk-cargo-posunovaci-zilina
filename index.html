@@ -150,13 +150,6 @@
         white-space: nowrap;
         flex-shrink: 0;
     }
-    .nav-tlacidla .loading-indikator {
-        font-size: 12px; color: #4a90d9; font-weight: bold;
-        white-space: nowrap;
-        flex-shrink: 0;
-        display: none;
-    }
-    .nav-tlacidla .loading-indikator.aktivny { display: inline-block; }
 
     .info-dnes {
         display: table-row;
@@ -267,7 +260,6 @@
         color: #000;
     }
 
-    /* Tlačidlo "zmazať" – plná šírka */
     .modal-options .btn-zmazat {
         grid-column: 1 / -1;
         font-size: 14px;
@@ -306,10 +298,43 @@
         background: #f0f0f0;
         color: #333;
     }
+
+    /* ===== CELOOBRAZOVKA NAČÍTAVANIA ===== */
+    .loading-overlay {
+        position: fixed;
+        inset: 0;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        animation: fadeIn 0.2s ease-out;
+    }
+    .loading-overlay.skryte { display: none !important; }
+    .loading-overlay .loading-text {
+        font-size: 18px;
+        font-weight: bold;
+        color: #4a90d9;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .loading-overlay .loading-text::before {
+        content: "";
+        width: 22px;
+        height: 22px;
+        border: 3px solid #cfe0f5;
+        border-top-color: #4a90d9;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
 </style>
 <body>
 
-<div class="obsah-wrap">
+<div class="obsah-wrap" id="obsahWrap">
 
     <h2 id="mesiacNadpis">Tabuľka mesiaca</h2>
 
@@ -318,7 +343,6 @@
             <button id="btnPredchadzajuci">◄ Predchádzajúci</button>
             <span class="aktualny-mesiac" id="aktualnyMesiac"></span>
             <button id="btnNasledujuci">Nasledujúci ►</button>
-            <span class="loading-indikator" id="loadingIndikator">⏳ načítavam…</span>
         </div>
     </div>
 
@@ -331,6 +355,11 @@
         <tbody id="telo"></tbody>
     </table>
 
+</div>
+
+<!-- ===== CELOOBRAZOVKA NAČÍTAVANIA ===== -->
+<div id="loadingOverlay" class="loading-overlay skryte">
+    <div class="loading-text">Načítavam…</div>
 </div>
 
 <!-- ===== MODÁLNE OKNO PRE VÝBER ZNAKU ===== -->
@@ -362,10 +391,8 @@
     const ZNAKY_DEN = ["I", "/", "D", "J"];
     const DNI_BEZ_SIKMOVEJ = [0, 5, 6];
 
-    // Znaky, ktoré sa ponúkajú v modálnom okne (v tomto poradí)
     const ZNAKY_V_MODALE = ["I", "/", "O", "D", "J", "-"];
 
-    // Timeout a retry pre JSONP
     const JSONP_TIMEOUT_MS = 20000;
     const JSONP_MAX_POKUSOV = 3;
     const POST_OVERENIE_MS = 3000;
@@ -393,7 +420,6 @@
 
     let zmenyDatabaza = [];
 
-    // ===== STAV NAČÍTAVANIA =====
     let nacitavaSa = false;
     let cakajuciRefresh = false;
     let pocitadloPoziadaviek = 0;
@@ -504,11 +530,18 @@
         td.style.backgroundColor = "transparent";
     }
 
+    // ===== CELOOBRAZOVKA NAČÍTAVANIA =====
+    const loadingOverlay = document.getElementById("loadingOverlay");
+    const obsahWrap      = document.getElementById("obsahWrap");
+
     function zobrazLoading(ano) {
-        const el = document.getElementById("loadingIndikator");
-        if (!el) return;
-        if (ano) el.classList.add("aktivny");
-        else el.classList.remove("aktivny");
+        if (ano) {
+            loadingOverlay.classList.remove("skryte");
+            obsahWrap.classList.add("skryte");
+        } else {
+            loadingOverlay.classList.add("skryte");
+            obsahWrap.classList.remove("skryte");
+        }
         document.getElementById("btnPredchadzajuci").disabled = ano;
         document.getElementById("btnNasledujuci").disabled = ano;
     }
@@ -520,21 +553,13 @@
     const modalMoznosti = document.getElementById("modalMoznosti");
     const modalZrusit  = document.getElementById("modalZrusit");
 
-    let modalCallback = null; // aktuálna callback funkcia
+    let modalCallback = null;
 
-    /**
-     * Otvorí modálne okno.
-     * @param {string} nadpis      – nadpis okna
-     * @param {string} podnadpis   – podnadpis (HTML)
-     * @param {string} aktualny    – aktuálny znak (zvýrazní sa)
-     * @param {function} onVyber   – callback(znak) pri výbere
-     */
     function otvorModal(nadpis, podnadpis, aktualny, onVyber) {
         modalNadpis.textContent = nadpis;
         modalPodnadp.innerHTML = podnadpis || "";
         modalCallback = onVyber;
 
-        // Vyčistiť a vygenerovať tlačidlá
         modalMoznosti.innerHTML = "";
 
         ZNAKY_V_MODALE.forEach(znak => {
@@ -551,7 +576,6 @@
             modalMoznosti.appendChild(btn);
         });
 
-        // Tlačidlo "Vymazať" (prázdny znak)
         const btnZmazat = document.createElement("button");
         btnZmazat.type = "button";
         btnZmazat.classList.add("btn-zmazat");
@@ -572,13 +596,10 @@
         modalCallback = null;
     }
 
-    // Zatvorenie kliknutím na overlay (mimo boxu)
     modalEl.addEventListener("click", (e) => {
         if (e.target === modalEl) zatvorModal();
     });
-    // Zatvorenie tlačidlom "Zrušiť"
     modalZrusit.addEventListener("click", zatvorModal);
-    // Zatvorenie klávesou Escape
     document.addEventListener("keydown", (e) => {
         if (e.key === "Escape" && !modalEl.classList.contains("skryte")) {
             zatvorModal();
@@ -716,7 +737,6 @@
 
         const pocetDni = new Date(zobrazenyRok, zobrazenyMesiac + 1, 0).getDate();
 
-        // Ak je aktuálny mesiac, skryjeme dni pred dneškom
         const jeAktualny = jeAktualnyMesiac();
         const startDen = jeAktualny ? dnes.getDate() : 1;
 
@@ -859,7 +879,6 @@
         aktualizujInfoDnes();
     }
 
-    // ===== POMOCNÁ FUNKCIA: zapíš zmenu do DB + POST + refresh =====
     function zapisZmenu(clen, den, znak) {
         const datumStr = datumString(zobrazenyRok, zobrazenyMesiac, den);
 
@@ -874,7 +893,6 @@
         vykresliTabulku();
     }
 
-    // ===== KLIK HANDLER – používa modálne okno =====
     function pridelKlikHandler(td, clen, den, aktualnyZnak) {
         td.style.cursor = "pointer";
         td.title = (td.title ? td.title + " | " : "") +
@@ -937,7 +955,6 @@
         });
     }
 
-    // ===== HLAVNÝ REFRESH =====
     function obnovAVykresli(silent = false) {
         if (nacitavaSa) {
             cakajuciRefresh = true;
@@ -965,7 +982,6 @@
             });
     }
 
-    // ===== NAVIGAČNÉ TLAČIDLÁ =====
     document.getElementById("btnPredchadzajuci").addEventListener("click", () => {
         zobrazenyMesiac--;
         if (zobrazenyMesiac < 0) { zobrazenyMesiac = 11; zobrazenyRok--; }
@@ -977,7 +993,6 @@
         obnovAVykresli();
     });
 
-    // ===== ŠTART =====
     document.addEventListener("DOMContentLoaded", () => {
         obnovAVykresli();
     });
