@@ -23,101 +23,45 @@
     .name-col-aktivny { background-color: #f0f0f0 !important; color: #1a3a6b !important; font-weight: bold !important; }
     .turnus-den { font-weight: bold; }
 
-    .obsah-wrap {
-        display: table;
-        width: auto;
-        max-width: 100%;
-        box-sizing: border-box;
-    }
+    .obsah-wrap { display: table; width: auto; max-width: 100%; box-sizing: border-box; }
+    h2#mesiacNadpis { display: table-row; white-space: nowrap; margin: 0; padding: 0 0 12px 0; box-sizing: border-box; }
 
-    h2#mesiacNadpis {
-        display: table-row;
-        white-space: nowrap;
-        margin: 0;
-        padding: 0 0 12px 0;
-        box-sizing: border-box;
-    }
-
-    .turnus-O-single {
-        background-color: #ffffff;
-        color: #000;
-        font-weight: bold;
-        position: relative;
-        text-align: center;
-    }
+    .turnus-O-single { background-color: #ffffff; color: #000; font-weight: bold; position: relative; text-align: center; }
     .turnus-O-single::before {
-        content: "O";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-weight: bold;
-        color: #000;
-        pointer-events: none;
-        line-height: 1;
-        z-index: 2;
+        content: "O"; position: absolute; top: 50%; left: 50%;
+        transform: translate(-50%, -50%); font-weight: bold; color: #000;
+        pointer-events: none; line-height: 1; z-index: 2;
     }
     .turnus-O-single::after {
-        content: "";
-        position: absolute;
-        top: 0; bottom: 0;
-        left: 50%;
-        width: 1px;
-        background-color: #ccc;
-        transform: translateX(-50%);
-        pointer-events: none;
-        opacity: 1;
-        z-index: 1;
+        content: ""; position: absolute; top: 0; bottom: 0; left: 50%;
+        width: 1px; background-color: #ccc; transform: translateX(-50%);
+        pointer-events: none; opacity: 1; z-index: 1;
     }
-
     .turnus-OO {
-        background-color: #ffffff;
-        color: #000;
-        font-weight: bold;
-        position: relative;
-        text-align: center;
+        background-color: #ffffff; color: #000; font-weight: bold;
+        position: relative; text-align: center;
         background-image: linear-gradient(to right,
             transparent 0, transparent calc(33.333% - 0.5px),
             #ccc calc(33.333% - 0.5px), #ccc calc(33.333% + 0.5px),
             transparent calc(33.333% + 0.5px), transparent calc(66.666% - 0.5px),
             #ccc calc(66.666% - 0.5px), #ccc calc(66.666% + 0.5px),
             transparent calc(66.666% + 0.5px), transparent 100%);
-        background-repeat: no-repeat;
-        background-size: 100% 100%;
+        background-repeat: no-repeat; background-size: 100% 100%;
     }
     .turnus-OO::before {
-        content: "O";
-        position: absolute;
-        top: 50%;
-        left: 33.333%;
-        transform: translate(-50%, -50%);
-        font-weight: bold;
-        color: #000;
-        pointer-events: none;
-        line-height: 1;
-        z-index: 2;
+        content: "O"; position: absolute; top: 50%; left: 33.333%;
+        transform: translate(-50%, -50%); font-weight: bold; color: #000;
+        pointer-events: none; line-height: 1; z-index: 2;
     }
     .turnus-OO::after {
-        content: "O";
-        position: absolute;
-        top: 50%;
-        left: 66.666%;
-        transform: translate(-50%, -50%);
-        font-weight: bold;
-        color: #000;
-        pointer-events: none;
-        line-height: 1;
-        z-index: 2;
+        content: "O"; position: absolute; top: 50%; left: 66.666%;
+        transform: translate(-50%, -50%); font-weight: bold; color: #000;
+        pointer-events: none; line-height: 1; z-index: 2;
     }
-
     .turnus-C { background-color: #ffffff; color: #000; font-weight: bold; text-align: right; padding-right: 2px; }
     .turnus-C-rev {
-        background-color: #ffffff;
-        color: #000;
-        font-weight: bold;
-        text-align: left;
-        padding-left: 0;
-        padding-right: 0;
+        background-color: #ffffff; color: #000; font-weight: bold;
+        text-align: left; padding-left: 0; padding-right: 0;
     }
 
     .nav-tlacidla { display: table-row; white-space: nowrap; }
@@ -215,9 +159,7 @@
     .modal-footer .btn-zrusit:hover { background: #f0f0f0; color: #333; }
 
     /* ===== MODÁLNE OKNO – PRIDANIE ČLENA ===== */
-    .modal-forma {
-        display: flex; flex-direction: column; gap: 12px;
-    }
+    .modal-forma { display: flex; flex-direction: column; gap: 12px; }
     .modal-forma label {
         font-size: 12px; font-weight: bold; color: #333;
         display: flex; flex-direction: column; gap: 4px;
@@ -225,8 +167,7 @@
     .modal-forma input {
         padding: 10px 12px; font-size: 14px;
         border: 2px solid #cfe0f5; border-radius: 8px;
-        outline: none; transition: border-color 0.15s;
-        font-family: inherit;
+        outline: none; transition: border-color 0.15s; font-family: inherit;
     }
     .modal-forma input:focus { border-color: #4a90d9; }
     .modal-forma .btn-ulozit {
@@ -244,13 +185,8 @@
     }
 
     /* ===== ZELENÉ OKRÚHLE TLAČIDLO + ===== */
-    .btn-pridat-wrap {
-        display: table-row;
-    }
-    .btn-pridat-wrap > .btn-pridat-vnutor {
-        padding: 18px 0 6px 0;
-        text-align: left;
-    }
+    .btn-pridat-wrap { display: table-row; }
+    .btn-pridat-wrap > .btn-pridat-vnutor { padding: 18px 0 6px 0; text-align: left; }
     .btn-pridat {
         width: 48px; height: 48px; border-radius: 50%;
         background: #2e9e4f; color: #fff; border: none;
@@ -266,17 +202,15 @@
     }
     .btn-pridat:active { transform: translateY(0); }
 
-    /* ===== DRUHÁ TABUĽKA ===== */
-    .druha-tabulka-nadpis {
-        display: table-row;
-        white-space: nowrap;
-    }
+    /* ===== DRUHÁ TABUĽKA (noví členovia) ===== */
+    .druha-tabulka-nadpis { display: table-row; white-space: nowrap; }
     .druha-tabulka-nadpis > div {
         margin: 30px 0 12px 0;
         font-size: 16px; font-weight: bold; color: #1a3a6b;
         border-top: 2px solid #e0e0e0; padding-top: 20px;
     }
     #tabulkaNova { display: table; width: 100%; }
+    .novy-riadok-meno { font-style: italic; color: #555; }
 
     /* ===== CELOOBRAZOVKA NAČÍTAVANIA ===== */
     .loading-overlay {
@@ -405,7 +339,6 @@
     const JSONP_MAX_POKUSOV = 3;
     const POST_OVERENIE_MS = 3000;
 
-    // Pôvodný pevný zoznam (s turnusom)
     const clenovia = [
         { meno: "Ján Lukáč",        posun: 0 },
         { meno: "Viktor Imrišek",   posun: 1 },
@@ -417,7 +350,6 @@
         { meno: "Dávid Materlin",   posun: 7 }
     ];
 
-    // Nový zoznam z Google Sheets (bez turnusu)
     let noviClenovia = [];
 
     const nazvyMesiaca = [
@@ -483,7 +415,6 @@
         return znakPreDen(clen, rok, mesiac, den);
     }
 
-    // Pre nových členov – žiadny turnus, len manuálne zmeny
     function efektivnyZnakNovy(clen, rok, mesiac, den) {
         const zmena = najdiManualnuZmenu(clen.meno, rok, mesiac, den);
         return zmena ? zmena.novyZnak : "";
@@ -667,7 +598,7 @@
     });
 
     function ulozNovehoClena(meno, priezvisko, osobneCislo) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             const form = document.createElement("form");
             form.method = "POST";
             form.action = API_URL;
@@ -691,8 +622,6 @@
             form.submit();
             document.body.removeChild(form);
 
-            // Predpokladáme úspech – po POST_OVERENIE_MS sa obnoví tabuľka
-            // a ak by zlyhalo, užívateľ to uvidí v zozname.
             setTimeout(resolve, POST_OVERENIE_MS);
         });
     }
@@ -1011,7 +940,7 @@
             const tr = document.createElement("tr");
 
             const tdMeno = document.createElement("td");
-            tdMeno.className = "name-col";
+            tdMeno.className = "name-col novy-riadok-meno";
             tdMeno.textContent = clen.meno;
             tr.appendChild(tdMeno);
 
