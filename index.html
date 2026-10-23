@@ -513,6 +513,10 @@
 
         const pocetDni = new Date(zobrazenyRok, zobrazenyMesiac + 1, 0).getDate();
 
+        // ===== NOVÉ: ak je aktuálny mesiac, skryjeme dni pred dneškom =====
+        const jeAktualny = jeAktualnyMesiac();
+        const startDen = jeAktualny ? dnes.getDate() : 1;
+
         document.getElementById("mesiacNadpis").textContent =
             "Tabuľka mesiaca – " + nazvyMesiaca[zobrazenyMesiac] + " " + zobrazenyRok;
         document.getElementById("aktualnyMesiac").textContent =
@@ -526,7 +530,8 @@
         thMeno.textContent = "Meno a priezvisko";
         hlavicka.appendChild(thMeno);
 
-        for (let d = 1; d <= pocetDni; d++) {
+        // Hlavička len od startDen po pocetDni
+        for (let d = startDen; d <= pocetDni; d++) {
             const datum = new Date(zobrazenyRok, zobrazenyMesiac, d);
             const denTyzna = datum.getDay();
             const th = document.createElement("th");
@@ -557,29 +562,34 @@
             }
             tr.appendChild(tdMeno);
 
-            const predchDatum = new Date(zobrazenyRok, zobrazenyMesiac, 0);
-            const presahZMinuleho = efektivnyZnak(
-                clen, predchDatum.getFullYear(), predchDatum.getMonth(), predchDatum.getDate()
-            ) === "O";
+            // "C" (noc pokračuje z minulého mesiaca) má zmysel len ak zobrazujeme od 1. dňa
+            // (t. j. nie aktuálny mesiac skrátený). V skrátenom režime ho preskočíme.
+            if (startDen === 1) {
+                const predchDatum = new Date(zobrazenyRok, zobrazenyMesiac, 0);
+                const presahZMinuleho = efektivnyZnak(
+                    clen, predchDatum.getFullYear(), predchDatum.getMonth(), predchDatum.getDate()
+                ) === "O";
 
-            let d = 1;
+                if (presahZMinuleho) {
+                    const td = document.createElement("td");
+                    td.textContent = "Ↄ";
+                    td.classList.add("turnus-C-rev");
+                    td.title = "Noc pokračuje z minulého mesiaca";
+                    if (jeDnes(zobrazenyRok, zobrazenyMesiac, 1)) td.classList.add("dnes-stlpec");
+                    pridelKlikHandler(td, clen, 1, "Ↄ");
+                    tr.appendChild(td);
+                }
+            }
+
+            let d = startDen;
             while (d <= pocetDni) {
                 const znak = efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, d);
                 const datum = new Date(zobrazenyRok, zobrazenyMesiac, d);
                 const denTyzna = datum.getDay();
                 const td = document.createElement("td");
 
-                if (d === 1 && presahZMinuleho) {
-                    td.textContent = "Ↄ";
-                    td.classList.add("turnus-C-rev");
-                    td.title = "Noc pokračuje z minulého mesiaca";
-                    if (jeDnes(zobrazenyRok, zobrazenyMesiac, d)) td.classList.add("dnes-stlpec");
-                    pridelKlikHandler(td, clen, d, "Ↄ");
-                    tr.appendChild(td);
-                    d += 1;
-                    continue;
-                }
-
+                // "C" (noc začína na konci mesiaca) – zachováme len ak nie sme v skrátenom režime,
+                // alebo ak je to posledný deň mesiaca (vždy sa zobrazí).
                 if (d === pocetDni && znak === "O") {
                     td.textContent = "C";
                     td.classList.add("turnus-C");
@@ -597,6 +607,7 @@
                         ? efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, dalsiDen)
                         : null;
 
+                    // Dve nočné po sebe – len ak sú obe dni v zobrazovanom rozsahu
                     if (dalsiZnak === "O" && d + 2 <= pocetDni) {
                         td.colSpan = 3;
                         td.classList.add("turnus-OO");
