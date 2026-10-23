@@ -23,6 +23,8 @@
     .name-col-aktivny { background-color: #f0f0f0 !important; color: #1a3a6b !important; font-weight: bold !important; }
     .turnus-den { font-weight: bold; }
 
+    td sub { font-size: 0.7em; }
+
     .obsah-wrap { display: table; width: auto; max-width: 100%; box-sizing: border-box; }
     h2#mesiacNadpis { display: table-row; white-space: nowrap; margin: 0; padding: 0 0 12px 0; box-sizing: border-box; }
 
@@ -318,6 +320,7 @@
     const DNI_BEZ_SIKMOVEJ = [0, 5, 6];
 
     const ZNAKY_V_MODALE = ["I", "/", "O", "D", "J", "-"];
+    const ZNAKY_V_MODALE_NOVY = ["Im", "Ie", "O", "D", "J", "-"];
 
     const JSONP_TIMEOUT_MS = 20000;
     const JSONP_MAX_POKUSOV = 3;
@@ -384,6 +387,12 @@
             .trim()
             .replace(/\s+/g, " ")
             .toLowerCase();
+    }
+
+    function zobrazZnak(znak) {
+        if (znak === "Im") return "I<sub>m</sub>";
+        if (znak === "Ie") return "I<sub>e</sub>";
+        return znak;
     }
 
     function najdiManualnuZmenu(meno, rok, mesiac, den) {
@@ -489,16 +498,18 @@
 
     let modalCallback = null;
 
-    function otvorModal(nadpis, podnadpis, aktualny, onVyber) {
+    function otvorModal(nadpis, podnadpis, aktualny, onVyber, jeNovy = false) {
         modalNadpis.textContent = nadpis;
         modalPodnadp.innerHTML = podnadpis || "";
         modalCallback = onVyber;
         modalMoznosti.innerHTML = "";
 
-        ZNAKY_V_MODALE.forEach(znak => {
+        const zoznam = jeNovy ? ZNAKY_V_MODALE_NOVY : ZNAKY_V_MODALE;
+
+        zoznam.forEach(znak => {
             const btn = document.createElement("button");
             btn.type = "button";
-            btn.textContent = znak;
+            btn.innerHTML = zobrazZnak(znak);
             btn.title = znak === "-" ? "Vymazať / voľno" : ("Znak " + znak);
             if (znak === aktualny) btn.classList.add("aktualny");
             btn.addEventListener("click", () => {
@@ -869,8 +880,8 @@
                 continue;
             }
 
-            td.textContent = znak;
-            if (ZNAKY_DEN.includes(znak)) td.classList.add("turnus-den");
+            td.innerHTML = zobrazZnak(znak);
+            if (ZNAKY_DEN.includes(znak) || znak === "Im" || znak === "Ie") td.classList.add("turnus-den");
             if (jeDnes(zobrazenyRok, zobrazenyMesiac, d)) td.classList.add("dnes-stlpec");
             pridelKlikHandler(td, clen, d, znak);
             tr.appendChild(td);
@@ -951,7 +962,7 @@
         vykresliNovuTabulku();
     }
 
-    function pridelKlikHandler(td, clen, den, aktualnyZnak) {
+    function pridelKlikHandler(td, clen, den, aktualnyZnak, jeNovy = false) {
         td.style.cursor = "pointer";
         td.title = "Klikni pre zmenu. Aktuálne: '" + (aktualnyZnak || "prázdne") + "'";
         td.addEventListener("click", () => {
@@ -960,7 +971,8 @@
                 "Pre <strong>" + clen.meno + "</strong>, deň <strong>" + den + ". "
                     + nazvyMesiaca[zobrazenyMesiac] + " " + zobrazenyRok + "</strong>",
                 aktualnyZnak,
-                (znak) => zapisZmenu(clen, den, znak)
+                (znak) => zapisZmenu(clen, den, znak),
+                jeNovy
             );
         });
     }
@@ -971,7 +983,6 @@
             const rect = td.getBoundingClientRect();
             const relativnaX = (event.clientX - rect.left) / rect.width;
             const den = (relativnaX < 0.5) ? den1 : den2;
-            // Pre pôvodných členov použijeme turnus, pre nových len manuálne zmeny
             const jeNovy = !clen.posun && clen.posun !== 0;
             const aktualnyZnak = jeNovy
                 ? efektivnyZnakNovy(clen, zobrazenyRok, zobrazenyMesiac, den)
@@ -981,7 +992,8 @@
                 "Pre <strong>" + clen.meno + "</strong>, deň <strong>" + den + "</strong> ("
                     + nazvyMesiaca[zobrazenyMesiac] + " " + zobrazenyRok + ")",
                 aktualnyZnak,
-                (znak) => zapisZmenu(clen, den, znak)
+                (znak) => zapisZmenu(clen, den, znak),
+                jeNovy
             );
         });
     }
@@ -1004,7 +1016,8 @@
                 "Pre <strong>" + clen.meno + "</strong>, deň <strong>" + den + "</strong> ("
                     + nazvyMesiaca[zobrazenyMesiac] + " " + zobrazenyRok + ")",
                 aktualnyZnak,
-                (znak) => zapisZmenu(clen, den, znak)
+                (znak) => zapisZmenu(clen, den, znak),
+                jeNovy
             );
         });
     }
@@ -1038,7 +1051,7 @@
             .finally(() => {
                 nacitavaSa = false;
                 if (!silent) zobrazLoading(false);
-                if (cakujuciRefresh) {
+                if (cakajuciRefresh) {
                     cakajuciRefresh = false;
                     obnovAVykresli(silent);
                 }
