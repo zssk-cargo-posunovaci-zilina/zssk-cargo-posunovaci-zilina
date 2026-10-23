@@ -113,6 +113,51 @@
         z-index: 2;
     }
 
+    /* ===== NOČNÁ PRECHAÁDZAJÚCA Z MINULÉHO MESIACA – colspan 2 ===== */
+    /* Ľavá polovica = Ↄ (deň 1 patrí do noci z minulého mesiaca),
+       pravá polovica = O (deň 1 je prvý deň novej noci v tomto mesiaci) */
+    .turnus-Crev-O {
+        background-color: #ffffff;
+        color: #000;
+        font-weight: bold;
+        position: relative;
+        text-align: center;
+    }
+    .turnus-Crev-O::before {
+        content: "Ↄ";
+        position: absolute;
+        top: 50%;
+        left: 25%;
+        transform: translate(-50%, -50%);
+        font-weight: bold;
+        color: #000;
+        pointer-events: none;
+        line-height: 1;
+        z-index: 2;
+    }
+    .turnus-Crev-O::after {
+        content: "O";
+        position: absolute;
+        top: 50%;
+        left: 75%;
+        transform: translate(-50%, -50%);
+        font-weight: bold;
+        color: #000;
+        pointer-events: none;
+        line-height: 1;
+        z-index: 2;
+    }
+    .turnus-Crev-O .crev-delim {
+        position: absolute;
+        top: 0; bottom: 0;
+        left: 50%;
+        width: 1px;
+        background-color: #ccc;
+        transform: translateX(-50%);
+        pointer-events: none;
+        z-index: 1;
+    }
+
     .turnus-C { background-color: #ffffff; color: #000; font-weight: bold; text-align: right; padding-right: 2px; }
     .turnus-C-rev {
         background-color: #ffffff;
@@ -784,24 +829,94 @@
             }
             tr.appendChild(tdMeno);
 
-            if (startDen === 1) {
-                const predchDatum = new Date(zobrazenyRok, zobrazenyMesiac, 0);
-                const presahZMinuleho = efektivnyZnak(
-                    clen, predchDatum.getFullYear(), predchDatum.getMonth(), predchDatum.getDate()
-                ) === "O";
+            let d = startDen;
 
-                if (presahZMinuleho) {
+            // ===== OPRAVA A: ak deň 1 (alebo startDen) patrí do noci z minulého
+            // mesiaca, zlúčime ho s nasledujúcim dňom do jednej bunky colspan=2.
+            // Tým pádom riadok vždy obsahuje presne toľko "stĺpcov" ako hlavička. =====
+            if (d === 1) {
+                const predchDatum = new Date(zobrazenyRok, zobrazenyMesiac, 0);
+                const poslednyDenMinuleho =
+                    efektivnyZnak(clen, predchDatum.getFullYear(),
+                        predchDatum.getMonth(), predchDatum.getDate());
+                const dnesnyZnak = efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, 1);
+                const dalsiDen = 2;
+                const dalsiZnak = (dalsiDen <= pocetDni)
+                    ? efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, dalsiDen)
+                    : null;
+
+                // Ak posledný deň minulého mesiaca bol "O", tak deň 1 je ešte
+                // druhá polovica tej noci. Zlúčime deň 1 s dňom 2 do jednej bunky:
+                //   ľavá polovica  = Ↄ  (deň 1 – noc pokračuje z minulého mesiaca)
+                //   pravá polovica = O  (deň 2 – začína nová noc, ak je dalsiZnak === "O")
+                // Ak dalsiZnak nie je "O", pravá polovica patrí dňu 2 ako samostatný znak
+                // – vtedy Ↄ bunku pridáme ako zlúčenú s dňom 2 a deň 2 vykreslíme vpravo.
+                if (poslednyDenMinuleho === "O") {
                     const td = document.createElement("td");
-                    td.textContent = "Ↄ";
-                    td.classList.add("turnus-C-rev");
-                    td.title = "Noc pokračuje z minulého mesiaca";
-                    if (jeDnes(zobrazenyRok, zobrazenyMesiac, 1)) td.classList.add("dnes-stlpec");
-                    pridelKlikHandler(td, clen, 1, "Ↄ");
-                    tr.appendChild(td);
+                    td.colSpan = 2;
+                    td.classList.add("turnus-Crev-O");
+                    td.textContent = "";
+
+                    const delim = document.createElement("span");
+                    delim.className = "crev-delim";
+                    td.appendChild(delim);
+
+                    if (dalsiZnak === "O") {
+                        // deň 1 = Ↄ, deň 2 = O  (obidva sú súčasťou nocí)
+                        td.title = "Deň 1: noc pokračuje z minulého mesiaca (Ↄ). "
+                                 + "Deň 2: začína nová noc (O).";
+                        // CSS ::before/::after už kreslia Ↄ a O
+                        nastavDnesZvyraznenie(td, 1, 2);
+                        pridelKlikHandlerPreCrevO(td, clen, 1, 2, true, true);
+                        tr.appendChild(td);
+                        d = 3;
+                        continue;
+                    } else {
+                        // deň 1 = Ↄ (noc z minulého mesiaca), deň 2 = hocičo iné
+                        // => pravá polovica patrí dňu 2, ale nie je to "O"
+                        // Musíme prekresliť pravú polovicu podľa dňa 2.
+                        td.classList.remove("turnus-Crev-O");
+                        td.classList.add("turnus-Crev-X");
+                        td.style.position = "relative";
+                        // vlastný obsah: vľavo Ↄ, vpravo znak dňa 2
+                        td.innerHTML = "";
+                        const spanL = document.createElement("span");
+                        spanL.textContent = "Ↄ";
+                        spanL.style.position = "absolute";
+                        spanL.style.top = "50%";
+                        spanL.style.left = "25%";
+                        spanL.style.transform = "translate(-50%, -50%)";
+                        spanL.style.fontWeight = "bold";
+                        spanL.style.zIndex = "2";
+                        spanL.style.pointerEvents = "none";
+                        td.appendChild(spanL);
+
+                        const spanR = document.createElement("span");
+                        spanR.textContent = dalsiZnak == null || dalsiZnak === "" ? "" : dalsiZnak;
+                        spanR.style.position = "absolute";
+                        spanR.style.top = "50%";
+                        spanR.style.left = "75%";
+                        spanR.style.transform = "translate(-50%, -50%)";
+                        spanR.style.fontWeight = "bold";
+                        spanR.style.zIndex = "2";
+                        spanR.style.pointerEvents = "none";
+                        td.appendChild(spanR);
+
+                        const del = document.createElement("span");
+                        del.className = "crev-delim";
+                        td.appendChild(del);
+
+                        td.title = "Deň 1: noc pokračuje z minulého mesiaca (Ↄ). "
+                                 + "Deň 2: " + (dalsiZnak || "prázdne") + ".";
+                        nastavDnesZvyraznenie(td, 1, 2);
+                        pridelKlikHandlerPreCrevO(td, clen, 1, 2, true, false);
+                        tr.appendChild(td);
+                        d = 3;
+                        continue;
+                    }
                 }
             }
 
-            let d = startDen;
             while (d <= pocetDni) {
                 const znak = efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, d);
                 const datum = new Date(zobrazenyRok, zobrazenyMesiac, d);
@@ -943,6 +1058,31 @@
             else if (relativnaX < 2 / 3) den = den2;
             else den = den3;
 
+            const aktualnyZnak = efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, den);
+
+            otvorModal(
+                "Vyber znak",
+                "Pre <strong>" + clen.meno + "</strong>, deň <strong>" + den + "</strong> ("
+                    + nazvyMesiaca[zobrazenyMesiac] + " " + zobrazenyRok + ")",
+                aktualnyZnak,
+                (znak) => zapisZmenu(clen, den, znak)
+            );
+        });
+    }
+
+    // Klik handler pre zlúčenú bunku "Ↄ + deň 2" (prípad prechodu noci z minulého mesiaca)
+    function pridelKlikHandlerPreCrevO(td, clen, den1, den2, lavaJeNoc, pravaJeNoc) {
+        td.style.cursor = "pointer";
+        td.title = (td.title ? td.title + " | " : "") +
+            "Klikni: ľavá časť = deň " + den1
+            + (lavaJeNoc ? " (Ↄ – noc z minulého mesiaca)" : "")
+            + ", pravá časť = deň " + den2
+            + (pravaJeNoc ? " (O – nová noc)" : "") + ".";
+
+        td.addEventListener("click", (event) => {
+            const rect = td.getBoundingClientRect();
+            const relativnaX = (event.clientX - rect.left) / rect.width;
+            const den = (relativnaX < 0.5) ? den1 : den2;
             const aktualnyZnak = efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, den);
 
             otvorModal(
