@@ -782,7 +782,7 @@
 
     // ===== SPOLOČNÉ VYKRESLENIE RIADKU (turnus alebo nový člen) =====
     // getZnak(clen, d) vráti znak pre daný deň
-    function vykresliRiadok(telo, clen, startDen, pocetDni, getZnak, menoClass) {
+    function vykresliRiadok(telo, clen, startDen, pocetDni, getZnak, menoClass, jeNovy = false) {
         const tr = document.createElement("tr");
 
         const tdMeno = document.createElement("td");
@@ -812,7 +812,7 @@
                 td.classList.add("turnus-C-rev");
                 td.title = "Deň 1: noc pokračuje z minulého mesiaca";
                 if (jeDnes(zobrazenyRok, zobrazenyMesiac, 1)) td.classList.add("dnes-stlpec");
-                pridelKlikHandler(td, clen, 1, "Ↄ");
+                pridelKlikHandler(td, clen, 1, "Ↄ", jeNovy);
                 tr.appendChild(td);
                 d = 2;
             }
@@ -829,7 +829,7 @@
                 td.classList.add("turnus-C");
                 td.title = "Noc začína na konci mesiaca";
                 if (jeDnes(zobrazenyRok, zobrazenyMesiac, d)) td.classList.add("dnes-stlpec");
-                pridelKlikHandler(td, clen, d, "C");
+                pridelKlikHandler(td, clen, d, "C", jeNovy);
                 tr.appendChild(td);
                 d += 1;
                 continue;
@@ -846,7 +846,7 @@
                     td.textContent = "";
                     td.title = "Dve nočné po sebe (deň " + d + " → deň " + (d + 2) + ")";
                     nastavDnesZvyraznenie(td, d, d + 2);
-                    pridelKlikHandlerPreOO(td, clen, d, d + 1, d + 2);
+                    pridelKlikHandlerPreOO(td, clen, d, d + 1, d + 2, jeNovy);
                     tr.appendChild(td);
                     d += 3;
                     continue;
@@ -856,7 +856,7 @@
                 td.textContent = "";
                 td.title = "Noc (deň " + d + " → deň " + dalsiDen + ")";
                 nastavDnesZvyraznenie(td, d, dalsiDen);
-                pridelKlikHandlerPreSingle(td, clen, d, d + 1);
+                pridelKlikHandlerPreSingle(td, clen, d, d + 1, jeNovy);
                 tr.appendChild(td);
                 d += 2;
                 continue;
@@ -865,7 +865,7 @@
             if (znak === "-" || znak === "" || znak == null) {
                 td.textContent = "";
                 if (jeDnes(zobrazenyRok, zobrazenyMesiac, d)) td.classList.add("dnes-stlpec");
-                pridelKlikHandler(td, clen, d, znak || "");
+                pridelKlikHandler(td, clen, d, znak || "", jeNovy);
                 tr.appendChild(td);
                 d += 1;
                 continue;
@@ -874,7 +874,7 @@
             if (znak === "/" && DNI_BEZ_SIKMOVEJ.includes(denTyzna)) {
                 td.textContent = "";
                 if (jeDnes(zobrazenyRok, zobrazenyMesiac, d)) td.classList.add("dnes-stlpec");
-                pridelKlikHandler(td, clen, d, "");
+                pridelKlikHandler(td, clen, d, "", jeNovy);
                 tr.appendChild(td);
                 d += 1;
                 continue;
@@ -883,7 +883,7 @@
             td.innerHTML = zobrazZnak(znak);
             if (ZNAKY_DEN.includes(znak) || znak === "Im" || znak === "Ie") td.classList.add("turnus-den");
             if (jeDnes(zobrazenyRok, zobrazenyMesiac, d)) td.classList.add("dnes-stlpec");
-            pridelKlikHandler(td, clen, d, znak);
+            pridelKlikHandler(td, clen, d, znak, jeNovy);
             tr.appendChild(td);
             d += 1;
         }
@@ -910,7 +910,7 @@
         telo.innerHTML = "";
 
         clenovia.forEach(clen => {
-            vykresliRiadok(telo, clen, startDen, pocetDni, efektivnyZnak, "name-col");
+            vykresliRiadok(telo, clen, startDen, pocetDni, efektivnyZnak, "name-col", false);
         });
 
         aktualizujInfoDnes();
@@ -944,7 +944,8 @@
             vykresliRiadok(
                 telo, clen, startDen, pocetDni,
                 efektivnyZnakNovy,        // nový člen – len manuálne zmeny, žiadny turnus
-                "name-col novy-riadok-meno"
+                "name-col novy-riadok-meno",
+                true
             );
         });
     }
@@ -977,13 +978,12 @@
         });
     }
 
-    function pridelKlikHandlerPreSingle(td, clen, den1, den2) {
+    function pridelKlikHandlerPreSingle(td, clen, den1, den2, jeNovy = false) {
         td.style.cursor = "pointer";
         td.addEventListener("click", (event) => {
             const rect = td.getBoundingClientRect();
             const relativnaX = (event.clientX - rect.left) / rect.width;
             const den = (relativnaX < 0.5) ? den1 : den2;
-            const jeNovy = !clen.posun && clen.posun !== 0;
             const aktualnyZnak = jeNovy
                 ? efektivnyZnakNovy(clen, zobrazenyRok, zobrazenyMesiac, den)
                 : efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, den);
@@ -997,8 +997,8 @@
             );
         });
     }
-
-    function pridelKlikHandlerPreOO(td, clen, den1, den2, den3) {
+    
+    function pridelKlikHandlerPreOO(td, clen, den1, den2, den3, jeNovy = false) {
         td.style.cursor = "pointer";
         td.addEventListener("click", (event) => {
             const rect = td.getBoundingClientRect();
@@ -1007,7 +1007,6 @@
             if (relativnaX < 1 / 3) den = den1;
             else if (relativnaX < 2 / 3) den = den2;
             else den = den3;
-            const jeNovy = !clen.posun && clen.posun !== 0;
             const aktualnyZnak = jeNovy
                 ? efektivnyZnakNovy(clen, zobrazenyRok, zobrazenyMesiac, den)
                 : efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, den);
