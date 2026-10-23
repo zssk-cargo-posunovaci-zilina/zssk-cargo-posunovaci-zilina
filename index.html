@@ -185,6 +185,127 @@
     }
 
     .skryte { display: none !important; }
+
+    /* ===== MODÁLNE OKNO ===== */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        animation: fadeIn 0.15s ease-out;
+    }
+    .modal-overlay.skryte { display: none !important; }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+
+    .modal-box {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        padding: 20px 22px 18px 22px;
+        min-width: 320px;
+        max-width: 90vw;
+        animation: slideUp 0.18s ease-out;
+    }
+    @keyframes slideUp {
+        from { transform: translateY(15px); opacity: 0; }
+        to   { transform: translateY(0);    opacity: 1; }
+    }
+
+    .modal-title {
+        font-size: 15px;
+        font-weight: bold;
+        color: #1a3a6b;
+        margin: 0 0 4px 0;
+    }
+    .modal-subtitle {
+        font-size: 12px;
+        color: #666;
+        margin: 0 0 16px 0;
+    }
+    .modal-subtitle strong { color: #333; }
+
+    .modal-options {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+    .modal-options button {
+        padding: 14px 0;
+        font-size: 20px;
+        font-weight: bold;
+        border: 2px solid #4a90d9;
+        background: #f4f8ff;
+        color: #1a3a6b;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.15s;
+        line-height: 1;
+    }
+    .modal-options button:hover {
+        background: #4a90d9;
+        color: #fff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(74,144,217,0.35);
+    }
+    .modal-options button:active {
+        transform: translateY(0);
+    }
+    .modal-options button.aktualny {
+        border-color: #f0c419;
+        background: #fff8d9;
+        box-shadow: 0 0 0 2px #f0c419 inset;
+    }
+    .modal-options button.aktualny:hover {
+        background: #f0c419;
+        color: #000;
+    }
+
+    /* Tlačidlo "zmazať" – plná šírka */
+    .modal-options .btn-zmazat {
+        grid-column: 1 / -1;
+        font-size: 14px;
+        padding: 11px 0;
+        border-color: #d9534f;
+        background: #fdf3f3;
+        color: #a94442;
+        margin-top: 4px;
+    }
+    .modal-options .btn-zmazat:hover {
+        background: #d9534f;
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(217,83,79,0.35);
+    }
+    .modal-options .btn-zmazat.aktualny {
+        border-color: #f0c419;
+        background: #fff8d9;
+        color: #a94442;
+        box-shadow: 0 0 0 2px #f0c419 inset;
+    }
+
+    .modal-footer {
+        margin-top: 14px;
+        text-align: right;
+    }
+    .modal-footer .btn-zrusit {
+        background: transparent;
+        border: none;
+        color: #666;
+        font-size: 13px;
+        cursor: pointer;
+        padding: 6px 10px;
+        border-radius: 6px;
+    }
+    .modal-footer .btn-zrusit:hover {
+        background: #f0f0f0;
+        color: #333;
+    }
 </style>
 <body>
 
@@ -212,6 +333,22 @@
 
 </div>
 
+<!-- ===== MODÁLNE OKNO PRE VÝBER ZNAKU ===== -->
+<div id="modalVyber" class="modal-overlay skryte">
+    <div class="modal-box" role="dialog" aria-modal="true">
+        <div class="modal-title" id="modalNadpis">Vyber znak</div>
+        <div class="modal-subtitle" id="modalPodnadpis"></div>
+
+        <div class="modal-options" id="modalMoznosti">
+            <!-- Tlačidlá sa generujú dynamicky -->
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn-zrusit" id="modalZrusit">Zrušiť</button>
+        </div>
+    </div>
+</div>
+
 <script>
     // ===== KONFIGURÁCIA =====
     const API_URL = "https://script.google.com/macros/s/AKfycbzeWKQsJprVdzlwCukuIICMpvqEOENOQEvtMkw9C-Mr6kTB4z9B9GX0olDnEF2T_JEM0A/exec";
@@ -225,8 +362,8 @@
     const ZNAKY_DEN = ["I", "/", "D", "J"];
     const DNI_BEZ_SIKMOVEJ = [0, 5, 6];
 
-    const POVOLENE_ZNAKY = ["I", "/", "O", "D", "J", "-", ""];
-    const POVOLENE_ZNAKY_TEXT = "I, /, O, D, J, - (pomlčka) alebo prázdne na vymazanie.";
+    // Znaky, ktoré sa ponúkajú v modálnom okne (v tomto poradí)
+    const ZNAKY_V_MODALE = ["I", "/", "O", "D", "J", "-"];
 
     // Timeout a retry pre JSONP
     const JSONP_TIMEOUT_MS = 20000;
@@ -258,8 +395,8 @@
 
     // ===== STAV NAČÍTAVANIA =====
     let nacitavaSa = false;
-    let cakajuciRefresh = false;   // ak počas načítavania príde ďalšia požiadavka
-    let pocitadloPoziadaviek = 0;  // aby staršie requesty neprepísali novšie
+    let cakajuciRefresh = false;
+    let pocitadloPoziadaviek = 0;
 
     // ===== POMOCNÉ =====
     function dniMedzi(rok1, mes1, den1, rok2, mes2, den2) {
@@ -372,10 +509,81 @@
         if (!el) return;
         if (ano) el.classList.add("aktivny");
         else el.classList.remove("aktivny");
-        // Vypni/zapni tlačidlá počas načítavania
         document.getElementById("btnPredchadzajuci").disabled = ano;
         document.getElementById("btnNasledujuci").disabled = ano;
     }
+
+    // ===== MODÁLNE OKNO =====
+    const modalEl      = document.getElementById("modalVyber");
+    const modalNadpis  = document.getElementById("modalNadpis");
+    const modalPodnadp = document.getElementById("modalPodnadpis");
+    const modalMoznosti = document.getElementById("modalMoznosti");
+    const modalZrusit  = document.getElementById("modalZrusit");
+
+    let modalCallback = null; // aktuálna callback funkcia
+
+    /**
+     * Otvorí modálne okno.
+     * @param {string} nadpis      – nadpis okna
+     * @param {string} podnadpis   – podnadpis (HTML)
+     * @param {string} aktualny    – aktuálny znak (zvýrazní sa)
+     * @param {function} onVyber   – callback(znak) pri výbere
+     */
+    function otvorModal(nadpis, podnadpis, aktualny, onVyber) {
+        modalNadpis.textContent = nadpis;
+        modalPodnadp.innerHTML = podnadpis || "";
+        modalCallback = onVyber;
+
+        // Vyčistiť a vygenerovať tlačidlá
+        modalMoznosti.innerHTML = "";
+
+        ZNAKY_V_MODALE.forEach(znak => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.textContent = znak;
+            btn.title = znak === "-" ? "Vymazať / voľno" : ("Znak " + znak);
+            if (znak === aktualny) btn.classList.add("aktualny");
+            btn.addEventListener("click", () => {
+                const cb = modalCallback;
+                zatvorModal();
+                if (cb) cb(znak);
+            });
+            modalMoznosti.appendChild(btn);
+        });
+
+        // Tlačidlo "Vymazať" (prázdny znak)
+        const btnZmazat = document.createElement("button");
+        btnZmazat.type = "button";
+        btnZmazat.classList.add("btn-zmazat");
+        btnZmazat.textContent = "Vymazať (prázdne)";
+        if (aktualny === "" || aktualny == null) btnZmazat.classList.add("aktualny");
+        btnZmazat.addEventListener("click", () => {
+            const cb = modalCallback;
+            zatvorModal();
+            if (cb) cb("");
+        });
+        modalMoznosti.appendChild(btnZmazat);
+
+        modalEl.classList.remove("skryte");
+    }
+
+    function zatvorModal() {
+        modalEl.classList.add("skryte");
+        modalCallback = null;
+    }
+
+    // Zatvorenie kliknutím na overlay (mimo boxu)
+    modalEl.addEventListener("click", (e) => {
+        if (e.target === modalEl) zatvorModal();
+    });
+    // Zatvorenie tlačidlom "Zrušiť"
+    modalZrusit.addEventListener("click", zatvorModal);
+    // Zatvorenie klávesou Escape
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !modalEl.classList.contains("skryte")) {
+            zatvorModal();
+        }
+    });
 
     // ===== NAČÍTANIE Z GOOGLE SHEETS (JSONP s retry) =====
     function nacitajZmenyZoSheets(pokus = 1) {
@@ -395,10 +603,8 @@
                     resolve();
                     return;
                 }
-                // Neúspech – skús znova, ak ešte máme pokusy
                 if (pokus < JSONP_MAX_POKUSOV) {
                     console.warn(`JSONP pokus ${pokus} zlyhal, skúšam znova...`);
-                    // Malý backoff
                     setTimeout(() => {
                         nacitajZmenyZoSheets(pokus + 1).then(resolve);
                     }, 500 * pokus);
@@ -451,7 +657,6 @@
                 dokonci(false);
             };
 
-            // Anti-cache: unikátny callback + timestamp + random
             script.src = API_URL
                 + "?callback=" + callbackName
                 + "&_=" + Date.now()
@@ -479,8 +684,6 @@
         document.body.removeChild(form);
         console.log("POST odoslaný:", polia);
 
-        // Po chvíli over, či Google Script zápis naozaj zapísal.
-        // Ak áno, tabuľka sa obnoví s čerstvými dátami.
         setTimeout(() => {
             obnovAVykresli(true);
         }, POST_OVERENIE_MS);
@@ -513,7 +716,7 @@
 
         const pocetDni = new Date(zobrazenyRok, zobrazenyMesiac + 1, 0).getDate();
 
-        // ===== NOVÉ: ak je aktuálny mesiac, skryjeme dni pred dneškom =====
+        // Ak je aktuálny mesiac, skryjeme dni pred dneškom
         const jeAktualny = jeAktualnyMesiac();
         const startDen = jeAktualny ? dnes.getDate() : 1;
 
@@ -530,7 +733,6 @@
         thMeno.textContent = "Meno a priezvisko";
         hlavicka.appendChild(thMeno);
 
-        // Hlavička len od startDen po pocetDni
         for (let d = startDen; d <= pocetDni; d++) {
             const datum = new Date(zobrazenyRok, zobrazenyMesiac, d);
             const denTyzna = datum.getDay();
@@ -562,8 +764,6 @@
             }
             tr.appendChild(tdMeno);
 
-            // "C" (noc pokračuje z minulého mesiaca) má zmysel len ak zobrazujeme od 1. dňa
-            // (t. j. nie aktuálny mesiac skrátený). V skrátenom režime ho preskočíme.
             if (startDen === 1) {
                 const predchDatum = new Date(zobrazenyRok, zobrazenyMesiac, 0);
                 const presahZMinuleho = efektivnyZnak(
@@ -588,8 +788,6 @@
                 const denTyzna = datum.getDay();
                 const td = document.createElement("td");
 
-                // "C" (noc začína na konci mesiaca) – zachováme len ak nie sme v skrátenom režime,
-                // alebo ak je to posledný deň mesiaca (vždy sa zobrazí).
                 if (d === pocetDni && znak === "O") {
                     td.textContent = "C";
                     td.classList.add("turnus-C");
@@ -607,7 +805,6 @@
                         ? efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, dalsiDen)
                         : null;
 
-                    // Dve nočné po sebe – len ak sú obe dni v zobrazovanom rozsahu
                     if (dalsiZnak === "O" && d + 2 <= pocetDni) {
                         td.colSpan = 3;
                         td.classList.add("turnus-OO");
@@ -666,7 +863,6 @@
     function zapisZmenu(clen, den, znak) {
         const datumStr = datumString(zobrazenyRok, zobrazenyMesiac, den);
 
-        // Okamžitá lokálna aktualizácia (aby UI reagovalo hneď)
         zmenyDatabaza = zmenyDatabaza.filter(
             z => !(z.datum === datumStr && z.meno === clen.meno)
         );
@@ -674,32 +870,24 @@
             datum: datumStr, meno: clen.meno, den: den, novyZnak: znak
         });
 
-        // Pošli na server (POST) – po 3s sa overí a obnoví z reálnych dát
         ulozZmenuDoSheets(datumStr, clen.meno, den, znak);
-
-        // Okamžité prekreslenie s lokálnou zmenou
         vykresliTabulku();
     }
 
+    // ===== KLIK HANDLER – používa modálne okno =====
     function pridelKlikHandler(td, clen, den, aktualnyZnak) {
         td.style.cursor = "pointer";
         td.title = (td.title ? td.title + " | " : "") +
             "Klikni pre zmenu. Aktuálne: '" + (aktualnyZnak || "prázdne") + "'";
 
         td.addEventListener("click", () => {
-            const novy = prompt(
-                "Zadaj nový znak pre " + clen.meno + " dňa " + den + ".\n" +
-                "Možnosti: " + POVOLENE_ZNAKY_TEXT + "\n" +
-                "Aktuálne: '" + (aktualnyZnak || "prázdne") + "'",
-                aktualnyZnak
+            otvorModal(
+                "Vyber znak",
+                "Pre <strong>" + clen.meno + "</strong>, deň <strong>" + den + ". "
+                    + nazvyMesiaca[zobrazenyMesiac] + " " + zobrazenyRok + "</strong>",
+                aktualnyZnak,
+                (znak) => zapisZmenu(clen, den, znak)
             );
-            if (novy === null) return;
-            const znak = novy.trim();
-            if (!POVOLENE_ZNAKY.includes(znak)) {
-                alert("Neplatný znak. Povolené: " + POVOLENE_ZNAKY_TEXT);
-                return;
-            }
-            zapisZmenu(clen, den, znak);
         });
     }
 
@@ -712,22 +900,15 @@
             const rect = td.getBoundingClientRect();
             const relativnaX = (event.clientX - rect.left) / rect.width;
             const den = (relativnaX < 0.5) ? den1 : den2;
-
             const aktualnyZnak = efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, den);
 
-            const novy = prompt(
-                "Zadaj nový znak pre " + clen.meno + " dňa " + den + ".\n" +
-                "Možnosti: " + POVOLENE_ZNAKY_TEXT + "\n" +
-                "Aktuálne: '" + (aktualnyZnak || "prázdne") + "'",
-                aktualnyZnak
+            otvorModal(
+                "Vyber znak",
+                "Pre <strong>" + clen.meno + "</strong>, deň <strong>" + den + "</strong> ("
+                    + nazvyMesiaca[zobrazenyMesiac] + " " + zobrazenyRok + ")",
+                aktualnyZnak,
+                (znak) => zapisZmenu(clen, den, znak)
             );
-            if (novy === null) return;
-            const znak = novy.trim();
-            if (!POVOLENE_ZNAKY.includes(znak)) {
-                alert("Neplatný znak. Povolené: " + POVOLENE_ZNAKY_TEXT);
-                return;
-            }
-            zapisZmenu(clen, den, znak);
         });
     }
 
@@ -746,25 +927,18 @@
 
             const aktualnyZnak = efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, den);
 
-            const novy = prompt(
-                "Zadaj nový znak pre " + clen.meno + " dňa " + den + ".\n" +
-                "Možnosti: " + POVOLENE_ZNAKY_TEXT + "\n" +
-                "Aktuálne: '" + (aktualnyZnak || "prázdne") + "'",
-                aktualnyZnak
+            otvorModal(
+                "Vyber znak",
+                "Pre <strong>" + clen.meno + "</strong>, deň <strong>" + den + "</strong> ("
+                    + nazvyMesiaca[zobrazenyMesiac] + " " + zobrazenyRok + ")",
+                aktualnyZnak,
+                (znak) => zapisZmenu(clen, den, znak)
             );
-            if (novy === null) return;
-            const znak = novy.trim();
-            if (!POVOLENE_ZNAKY.includes(znak)) {
-                alert("Neplatný znak. Povolené: " + POVOLENE_ZNAKY_TEXT);
-                return;
-            }
-            zapisZmenu(clen, den, znak);
         });
     }
 
-    // ===== HLAVNÝ REFRESH: načítaj z Google Sheet a prekresli =====
+    // ===== HLAVNÝ REFRESH =====
     function obnovAVykresli(silent = false) {
-        // Ak už prebieha načítavanie, označ, že po ňom treba ešte raz obnoviť
         if (nacitavaSa) {
             cakajuciRefresh = true;
             return Promise.resolve();
@@ -777,7 +951,6 @@
 
         return nacitajZmenyZoSheets()
             .then(() => {
-                // Ak medzitým prišla novšia požiadavka, túto ignoruj
                 if (mojeCislo !== pocitadloPoziadaviek) return;
                 vykresliTabulku();
             })
@@ -785,7 +958,6 @@
                 nacitavaSa = false;
                 if (!silent) zobrazLoading(false);
 
-                // Ak počas načítavania prišla ďalšia požiadavka, spusti ju teraz
                 if (cakajuciRefresh) {
                     cakajuciRefresh = false;
                     obnovAVykresli(silent);
