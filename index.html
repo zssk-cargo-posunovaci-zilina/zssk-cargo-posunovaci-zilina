@@ -231,6 +231,31 @@
         border-radius: 50%; animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== MODÁLNE OKNO – OSOBNÉ ČÍSLO ===== */
+    .modal-osobne { display: flex; flex-direction: column; gap: 12px; }
+    .modal-osobne label {
+        font-size: 12px; font-weight: bold; color: #333;
+        display: flex; flex-direction: column; gap: 4px;
+    }
+    .modal-osobne input {
+        padding: 10px 12px; font-size: 16px;
+        border: 2px solid #cfe0f5; border-radius: 8px;
+        outline: none; transition: border-color 0.15s; font-family: inherit;
+    }
+    .modal-osobne input:focus { border-color: #4a90d9; }
+    .modal-osobne .btn-pokracovat {
+        margin-top: 8px; padding: 12px 0;
+        font-size: 15px; font-weight: bold;
+        border: none; border-radius: 8px;
+        background: #4a90d9; color: #fff;
+        cursor: pointer; transition: background-color 0.15s;
+    }
+    .modal-osobne .btn-pokracovat:hover { background: #357abd; }
+    .modal-osobne .chyba-msg {
+        color: #a94442; font-size: 12px; font-weight: bold;
+        min-height: 16px; margin-top: -4px;
+    }
 </style>
 <body>
 
@@ -295,13 +320,34 @@
         <form class="modal-forma" id="formPridat" autocomplete="off">
             <label>Meno <input type="text" id="inputMeno" required maxlength="50"></label>
             <label>Priezvisko <input type="text" id="inputPriezvisko" required maxlength="50"></label>
-            <label>Osobné číslo <input type="text" id="inputOsobneCislo" maxlength="30"></label>
+            <label>Osobné číslo <input type="text" id="inputOsobneCislo" maxlength="30" inputmode="numeric" pattern="[0-9]*"></label>
             <div class="chyba-msg" id="chybaPridat"></div>
             <button type="submit" class="btn-ulozit" id="btnUlozitClena">Uložiť</button>
         </form>
 
         <div class="modal-footer">
             <button type="button" class="btn-zrusit" id="modalPridatZrusit">Zrušiť</button>
+        </div>
+    </div>
+</div>
+
+<div id="modalOsobneCislo" class="modal-overlay skryte">
+    <div class="modal-box" role="dialog" aria-modal="true">
+        <div class="modal-title">Zadať osobné číslo</div>
+        <div class="modal-subtitle" id="modalOsobnePodnadpis"></div>
+
+        <form class="modal-osobne" id="formOsobneCislo" autocomplete="off">
+            <label>Osobné číslo
+                <input type="text" id="inputOsobneCisloOverenie" required
+                       inputmode="numeric" pattern="[0-9]*" maxlength="30"
+                       placeholder="Zadajte iba číslice">
+            </label>
+            <div class="chyba-msg" id="chybaOsobneCislo"></div>
+            <button type="submit" class="btn-pokracovat" id="btnPokracovatOsobne">Pokračovať</button>
+        </form>
+
+        <div class="modal-footer">
+            <button type="button" class="btn-zrusit" id="modalOsobneZrusit">Zrušiť</button>
         </div>
     </div>
 </div>
@@ -546,6 +592,82 @@
         if (e.key === "Escape" && !modalEl.classList.contains("skryte")) zatvorModal();
     });
 
+    // ===== MODÁLNE OKNO – OSOBNÉ ČÍSLO =====
+    const modalOsobne = document.getElementById("modalOsobneCislo");
+    const modalOsobnePodnadpis = document.getElementById("modalOsobnePodnadpis");
+    const formOsobneCislo = document.getElementById("formOsobneCislo");
+    const inputOsobneCisloOverenie = document.getElementById("inputOsobneCisloOverenie");
+    const chybaOsobneCislo = document.getElementById("chybaOsobneCislo");
+    const btnPokracovatOsobne = document.getElementById("btnPokracovatOsobne");
+    const modalOsobneZrusit = document.getElementById("modalOsobneZrusit");
+
+    let osobneCisloCallback = null;
+
+    // Povoliť iba číslice pri písaní
+    inputOsobneCisloOverenie.addEventListener("input", () => {
+        const ciste = inputOsobneCisloOverenie.value.replace(/\D/g, "");
+        if (inputOsobneCisloOverenie.value !== ciste) {
+            inputOsobneCisloOverenie.value = ciste;
+        }
+    });
+
+    inputOsobneCisloOverenie.addEventListener("paste", (e) => {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData("text");
+        const ciste = String(text || "").replace(/\D/g, "");
+        document.execCommand("insertText", false, ciste);
+    });
+
+    function otvorModalOsobneCislo(podnadpis, onOverene) {
+        modalOsobnePodnadpis.innerHTML = podnadpis || "";
+        osobneCisloCallback = onOverene;
+        chybaOsobneCislo.textContent = "";
+        inputOsobneCisloOverenie.value = "";
+        btnPokracovatOsobne.disabled = false;
+        btnPokracovatOsobne.textContent = "Pokračovať";
+        modalOsobne.classList.remove("skryte");
+        setTimeout(() => inputOsobneCisloOverenie.focus(), 50);
+    }
+
+    function zatvorModalOsobneCislo() {
+        modalOsobne.classList.add("skryte");
+        osobneCisloCallback = null;
+    }
+
+    modalOsobne.addEventListener("click", (e) => { if (e.target === modalOsobne) zatvorModalOsobneCislo(); });
+    modalOsobneZrusit.addEventListener("click", zatvorModalOsobneCislo);
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !modalOsobne.classList.contains("skryte")) zatvorModalOsobneCislo();
+    });
+
+    formOsobneCislo.addEventListener("submit", (e) => {
+        e.preventDefault();
+        chybaOsobneCislo.textContent = "";
+
+        const hodnota = inputOsobneCisloOverenie.value.trim();
+
+        if (!hodnota) {
+            chybaOsobneCislo.textContent = "Zadajte osobné číslo.";
+            inputOsobneCisloOverenie.focus();
+            return;
+        }
+        if (!/^\d+$/.test(hodnota)) {
+            chybaOsobneCislo.textContent = "Osobné číslo môže obsahovať iba číslice.";
+            inputOsobneCisloOverenie.focus();
+            return;
+        }
+
+        const cb = osobneCisloCallback;
+        if (cb) {
+            const vysledok = cb(hodnota);
+            if (vysledok === false) {
+                // callback vráti false, ak číslo nesedí – necháme modál otvorený
+                return;
+            }
+        }
+        zatvorModalOsobneCislo();
+    });
+
     // ===== MODÁLNE OKNO – PRIDANIE ČLENA =====
     const modalPridat   = document.getElementById("modalPridat");
     const modalPridatZrusit = document.getElementById("modalPridatZrusit");
@@ -555,6 +677,21 @@
     const inputOsobneCislo = document.getElementById("inputOsobneCislo");
     const chybaPridat  = document.getElementById("chybaPridat");
     const btnUlozitClena = document.getElementById("btnUlozitClena");
+
+    // Povoliť iba číslice pri pridávaní člena
+    inputOsobneCislo.addEventListener("input", () => {
+        const ciste = inputOsobneCislo.value.replace(/\D/g, "");
+        if (inputOsobneCislo.value !== ciste) {
+            inputOsobneCislo.value = ciste;
+        }
+    });
+
+    inputOsobneCislo.addEventListener("paste", (e) => {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData("text");
+        const ciste = String(text || "").replace(/\D/g, "");
+        document.execCommand("insertText", false, ciste);
+    });
 
     function otvorModalPridat() {
         formPridat.reset();
@@ -587,6 +724,11 @@
 
         if (!meno) { chybaPridat.textContent = "Zadaj meno."; inputMeno.focus(); return; }
         if (!priezvisko) { chybaPridat.textContent = "Zadaj priezvisko."; inputPriezvisko.focus(); return; }
+        if (osobne && !/^\d+$/.test(osobne)) {
+            chybaPridat.textContent = "Osobné číslo môže obsahovať iba číslice.";
+            inputOsobneCislo.focus();
+            return;
+        }
 
         btnUlozitClena.disabled = true;
         btnUlozitClena.textContent = "Ukladám…";
@@ -781,7 +923,6 @@
     }
 
     // ===== SPOLOČNÉ VYKRESLENIE RIADKU (turnus alebo nový člen) =====
-    // getZnak(clen, d) vráti znak pre daný deň
     function vykresliRiadok(telo, clen, startDen, pocetDni, getZnak, menoClass, jeNovy = false) {
         const tr = document.createElement("tr");
 
@@ -943,7 +1084,7 @@
         noviClenovia.forEach(clen => {
             vykresliRiadok(
                 telo, clen, startDen, pocetDni,
-                efektivnyZnakNovy,        // nový člen – len manuálne zmeny, žiadny turnus
+                efektivnyZnakNovy,
                 "name-col novy-riadok-meno",
                 true
             );
@@ -963,18 +1104,44 @@
         vykresliNovuTabulku();
     }
 
+    // ===== KLIK HANDLERY =====
     function pridelKlikHandler(td, clen, den, aktualnyZnak, jeNovy = false) {
         td.style.cursor = "pointer";
         td.title = "Klikni pre zmenu. Aktuálne: '" + (aktualnyZnak || "prázdne") + "'";
         td.addEventListener("click", () => {
-            otvorModal(
-                "Vyber znak",
-                "Pre <strong>" + clen.meno + "</strong>, deň <strong>" + den + ". "
-                    + nazvyMesiaca[zobrazenyMesiac] + " " + zobrazenyRok + "</strong>",
-                aktualnyZnak,
-                (znak) => zapisZmenu(clen, den, znak),
-                jeNovy
-            );
+            if (jeNovy) {
+                otvorModalOsobneCislo(
+                    "Pre <strong>" + clen.meno + "</strong>, deň <strong>" + den + ". "
+                        + nazvyMesiaca[zobrazenyMesiac] + " " + zobrazenyRok + "</strong>",
+                    (zadaneCislo) => {
+                        const ocakavane = String(clen.osobneCislo || "").trim();
+                        if (ocakavane && zadaneCislo !== ocakavane) {
+                            chybaOsobneCislo.textContent = "Nesprávne osobné číslo. Skúste znova.";
+                            inputOsobneCisloOverenie.value = "";
+                            inputOsobneCisloOverenie.focus();
+                            return false;
+                        }
+                        otvorModal(
+                            "Vyber znak",
+                            "Pre <strong>" + clen.meno + "</strong>, deň <strong>" + den + "</strong> ("
+                                + nazvyMesiaca[zobrazenyMesiac] + " " + zobrazenyRok + ")",
+                            aktualnyZnak,
+                            (znak) => zapisZmenu(clen, den, znak),
+                            true
+                        );
+                        return true;
+                    }
+                );
+            } else {
+                otvorModal(
+                    "Vyber znak",
+                    "Pre <strong>" + clen.meno + "</strong>, deň <strong>" + den + ". "
+                        + nazvyMesiaca[zobrazenyMesiac] + " " + zobrazenyRok + "</strong>",
+                    aktualnyZnak,
+                    (znak) => zapisZmenu(clen, den, znak),
+                    false
+                );
+            }
         });
     }
 
@@ -987,17 +1154,42 @@
             const aktualnyZnak = jeNovy
                 ? efektivnyZnakNovy(clen, zobrazenyRok, zobrazenyMesiac, den)
                 : efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, den);
-            otvorModal(
-                "Vyber znak",
-                "Pre <strong>" + clen.meno + "</strong>, deň <strong>" + den + "</strong> ("
-                    + nazvyMesiaca[zobrazenyMesiac] + " " + zobrazenyRok + ")",
-                aktualnyZnak,
-                (znak) => zapisZmenu(clen, den, znak),
-                jeNovy
-            );
+            if (jeNovy) {
+                otvorModalOsobneCislo(
+                    "Pre <strong>" + clen.meno + "</strong>, deň <strong>" + den + "</strong> ("
+                        + nazvyMesiaca[zobrazenyMesiac] + " " + zobrazenyRok + ")",
+                    (zadaneCislo) => {
+                        const ocakavane = String(clen.osobneCislo || "").trim();
+                        if (ocakavane && zadaneCislo !== ocakavane) {
+                            chybaOsobneCislo.textContent = "Nesprávne osobné číslo. Skúste znova.";
+                            inputOsobneCisloOverenie.value = "";
+                            inputOsobneCisloOverenie.focus();
+                            return false;
+                        }
+                        otvorModal(
+                            "Vyber znak",
+                            "Pre <strong>" + clen.meno + "</strong>, deň <strong>" + den + "</strong> ("
+                                + nazvyMesiaca[zobrazenyMesiac] + " " + zobrazenyRok + ")",
+                            aktualnyZnak,
+                            (znak) => zapisZmenu(clen, den, znak),
+                            true
+                        );
+                        return true;
+                    }
+                );
+            } else {
+                otvorModal(
+                    "Vyber znak",
+                    "Pre <strong>" + clen.meno + "</strong>, deň <strong>" + den + "</strong> ("
+                        + nazvyMesiaca[zobrazenyMesiac] + " " + zobrazenyRok + ")",
+                    aktualnyZnak,
+                    (znak) => zapisZmenu(clen, den, znak),
+                    false
+                );
+            }
         });
     }
-    
+
     function pridelKlikHandlerPreOO(td, clen, den1, den2, den3, jeNovy = false) {
         td.style.cursor = "pointer";
         td.addEventListener("click", (event) => {
@@ -1010,14 +1202,39 @@
             const aktualnyZnak = jeNovy
                 ? efektivnyZnakNovy(clen, zobrazenyRok, zobrazenyMesiac, den)
                 : efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, den);
-            otvorModal(
-                "Vyber znak",
-                "Pre <strong>" + clen.meno + "</strong>, deň <strong>" + den + "</strong> ("
-                    + nazvyMesiaca[zobrazenyMesiac] + " " + zobrazenyRok + ")",
-                aktualnyZnak,
-                (znak) => zapisZmenu(clen, den, znak),
-                jeNovy
-            );
+            if (jeNovy) {
+                otvorModalOsobneCislo(
+                    "Pre <strong>" + clen.meno + "</strong>, deň <strong>" + den + "</strong> ("
+                        + nazvyMesiaca[zobrazenyMesiac] + " " + zobrazenyRok + ")",
+                    (zadaneCislo) => {
+                        const ocakavane = String(clen.osobneCislo || "").trim();
+                        if (ocakavane && zadaneCislo !== ocakavane) {
+                            chybaOsobneCislo.textContent = "Nesprávne osobné číslo. Skúste znova.";
+                            inputOsobneCisloOverenie.value = "";
+                            inputOsobneCisloOverenie.focus();
+                            return false;
+                        }
+                        otvorModal(
+                            "Vyber znak",
+                            "Pre <strong>" + clen.meno + "</strong>, deň <strong>" + den + "</strong> ("
+                                + nazvyMesiaca[zobrazenyMesiac] + " " + zobrazenyRok + ")",
+                            aktualnyZnak,
+                            (znak) => zapisZmenu(clen, den, znak),
+                            true
+                        );
+                        return true;
+                    }
+                );
+            } else {
+                otvorModal(
+                    "Vyber znak",
+                    "Pre <strong>" + clen.meno + "</strong>, deň <strong>" + den + "</strong> ("
+                        + nazvyMesiaca[zobrazenyMesiac] + " " + zobrazenyRok + ")",
+                    aktualnyZnak,
+                    (znak) => zapisZmenu(clen, den, znak),
+                    false
+                );
+            }
         });
     }
 
