@@ -24,15 +24,14 @@
 
     /* ===== WRAPPER – správa sa ako tabuľka => šírka podľa obsahu ===== */
     .obsah-wrap {
-        display: table;           /* KĽÚČOVÉ: zmrští sa na šírku obsahu (tabuľky) */
+        display: table;
         width: auto;
         max-width: 100%;
         box-sizing: border-box;
     }
 
-    /* ===== NADPIS – rovnaká šírka ako tabuľka ===== */
     h2#mesiacNadpis {
-        display: table-row;       /* zaberie celú šírku wrappera */
+        display: table-row;
         white-space: nowrap;
         margin: 0;
         padding: 0 0 12px 0;
@@ -123,12 +122,10 @@
         padding-right: 0;
     }
 
-    /* ===== NAVIGÁCIA – rovnaká šírka, bez posuvníka ===== */
     .nav-tlacidla {
-        display: table-row;       /* zaberie celú šírku wrappera */
+        display: table-row;
         white-space: nowrap;
     }
-    /* Vnútorný flex kontajner, aby tlačidlá boli vedľa seba */
     .nav-tlacidla > .nav-vnutor {
         display: flex;
         align-items: center;
@@ -152,9 +149,8 @@
         flex-shrink: 0;
     }
 
-    /* ===== INFO BOX – rovnaká šírka ako tabuľka ===== */
     .info-dnes {
-        display: table-row;       /* zaberie celú šírku wrappera */
+        display: table-row;
         white-space: nowrap;
     }
     .info-dnes > .info-vnutor {
@@ -174,18 +170,15 @@
     .info-dnes .info-mena { font-weight: bold; color: #1a3a6b; }
     .info-dnes .info-ziadne { font-style: italic; color: #999; }
 
-    /* Tabuľka zaberie celú šírku wrappera */
     #tabulkaMesiaca {
         display: table;
         width: 100%;
     }
 
-    /* Skrytie tlačidla */
     .skryte { display: none !important; }
 </style>
 <body>
 
-<!-- WRAPPER: display:table => šírka podľa obsahu (tabuľky) -->
 <div class="obsah-wrap">
 
     <h2 id="mesiacNadpis">Tabuľka mesiaca</h2>
@@ -320,6 +313,19 @@
         }
     }
 
+    /* NOVÉ: určí, či je člen v daný deň "aktívny" pre zvýraznenie.
+       Aktívny je len ak efektívny znak je "I" alebo "/".
+       Pri "/" sa navyše nesmie zobrazovať v dňoch z DNI_BEZ_SIKMOVEJ (Pi, So, Ne). */
+    function jeDenAktivny(clen, rok, mesiac, den) {
+        const znak = efektivnyZnak(clen, rok, mesiac, den);
+        if (znak === "I") return true;
+        if (znak === "/") {
+            const denTyzna = new Date(rok, mesiac, den).getDay();
+            return !DNI_BEZ_SIKMOVEJ.includes(denTyzna);
+        }
+        return false;
+    }
+
     function nastavDnesZvyraznenie(td, startDen, endDen) {
         if (!(dnes.getFullYear() === zobrazenyRok && dnes.getMonth() === zobrazenyMesiac)) return;
         const dnesDen = dnes.getDate();
@@ -424,6 +430,7 @@
         console.log("POST odoslaný:", polia);
     }
 
+    /* UPRAVENÉ: aktívni sú len tí, čo majú "I" alebo "/" (a "/" nie v Pi/So/Ne) */
     function aktualizujInfoDnes() {
         const vnutro = document.querySelector("#infoDnes > .info-vnutor");
         const den = dnes.getDate();
@@ -433,10 +440,7 @@
         const datumText = den + ". " + nazvyMesiaca[mesiac] + " " + rok
             + " (" + skratkyDni[denTyzna] + ")";
 
-        const aktivni = clenovia.filter(clen => {
-            const znak = efektivnyZnak(clen, rok, mesiac, den);
-            return ZNAKY_DEN.includes(znak);
-        });
+        const aktivni = clenovia.filter(clen => jeDenAktivny(clen, rok, mesiac, den));
 
         let menaHtml = aktivni.length > 0
             ? aktivni.map(c => c.meno).join(", ")
@@ -491,9 +495,11 @@
             tdMeno.className = "name-col";
             tdMeno.textContent = clen.meno;
 
+            /* UPRAVENÉ: zvýraznenie mena v prvom stĺpci len ak je deň aktívny (I alebo "/" mimo Pi/So/Ne) */
             if (dnesVZobrazenom) {
-                const dnesnyZnak = efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, dnesDen);
-                if (ZNAKY_DEN.includes(dnesnyZnak)) tdMeno.classList.add("name-col-aktivny");
+                if (jeDenAktivny(clen, zobrazenyRok, zobrazenyMesiac, dnesDen)) {
+                    tdMeno.classList.add("name-col-aktivny");
+                }
             }
             tr.appendChild(tdMeno);
 
