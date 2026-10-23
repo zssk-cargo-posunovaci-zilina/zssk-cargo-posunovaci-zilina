@@ -813,7 +813,6 @@
     function nacitajZmenyZoSheets() {
         return jsonp(API_URL).then(data => {
             if (data && !Array.isArray(data) && data.result === "error") {
-                console.error("Server error (zmeny):", data.message);
                 zmenyDatabaza = [];
                 return;
             }
@@ -832,7 +831,6 @@
                         novyZnak: (novyZnak == null ? "" : String(novyZnak))
                     };
                 });
-                console.log("Načítané zmeny:", zmenyDatabaza.length, zmenyDatabaza);
             } else {
                 zmenyDatabaza = [];
             }
@@ -842,7 +840,6 @@
     function nacitajNovychClenovZoSheets() {
         return jsonp(API_URL + "?typ=clenovia").then(data => {
             if (data && !Array.isArray(data) && data.result === "error") {
-                console.error("Server error (členovia):", data.message);
                 noviClenovia = [];
                 return;
             }
@@ -851,7 +848,6 @@
                     meno: String(c.meno || "").trim(),
                     osobneCislo: String(c.osobneCislo || "").trim()
                 })).filter(c => c.meno);
-                console.log("Načítaní noví členovia:", noviClenovia.length, noviClenovia);
             } else {
                 noviClenovia = [];
             }
@@ -1254,7 +1250,6 @@
                 vykresliNovuTabulku();
             })
             .catch((err) => {
-                console.error("Chyba pri načítaní:", err);
                 if (mojeCislo === pocitadloPoziadaviek) {
                     vykresliTabulku();
                     vykresliNovuTabulku();
