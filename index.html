@@ -23,7 +23,6 @@
     .name-col-aktivny { background-color: #f0f0f0 !important; color: #1a3a6b !important; font-weight: bold !important; }
     .turnus-den { font-weight: bold; }
 
-    /* ===== WRAPPER – správa sa ako tabuľka => šírka podľa obsahu ===== */
     .obsah-wrap {
         display: table;
         width: auto;
@@ -39,7 +38,6 @@
         box-sizing: border-box;
     }
 
-    /* ===== JEDNA NOČNÁ – colspan 2, O v strede (50 %) ===== */
     .turnus-O-single {
         background-color: #ffffff;
         color: #000;
@@ -72,7 +70,6 @@
         z-index: 1;
     }
 
-    /* ===== DVE NOČNÉ PO SEBE – colspan 3 ===== */
     .turnus-OO {
         background-color: #ffffff;
         color: #000;
@@ -123,87 +120,53 @@
         padding-right: 0;
     }
 
-    .nav-tlacidla {
-        display: table-row;
-        white-space: nowrap;
-    }
+    .nav-tlacidla { display: table-row; white-space: nowrap; }
     .nav-tlacidla > .nav-vnutor {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        white-space: nowrap;
-        box-sizing: border-box;
-        width: 100%;
+        display: flex; align-items: center; gap: 12px;
+        white-space: nowrap; box-sizing: border-box; width: 100%;
     }
     .nav-tlacidla button {
         background-color: #4a90d9; color: white; border: none; padding: 8px 16px;
         font-size: 14px; font-weight: bold; border-radius: 6px; cursor: pointer;
-        transition: background-color 0.2s;
-        white-space: nowrap;
-        flex-shrink: 0;
+        transition: background-color 0.2s; white-space: nowrap; flex-shrink: 0;
     }
     .nav-tlacidla button:hover { background-color: #357abd; }
     .nav-tlacidla button:active { background-color: #2a5f94; }
     .nav-tlacidla button:disabled { background-color: #a0a0a0; cursor: wait; }
     .nav-tlacidla .aktualny-mesiac {
         font-size: 14px; color: #333; font-weight: bold;
-        white-space: nowrap;
-        flex-shrink: 0;
+        white-space: nowrap; flex-shrink: 0;
     }
 
-    .info-dnes {
-        display: table-row;
-        white-space: nowrap;
-    }
+    .info-dnes { display: table-row; white-space: nowrap; }
     .info-dnes > .info-vnutor {
-        background-color: #fff3b0;
-        border-left: 4px solid #f0c419;
-        padding: 10px 14px;
-        margin-bottom: 15px;
-        border-radius: 4px;
-        font-size: 13px;
-        color: #333;
-        line-height: 1.5;
-        white-space: nowrap;
-        box-sizing: border-box;
-        width: 100%;
+        background-color: #fff3b0; border-left: 4px solid #f0c419;
+        padding: 10px 14px; margin-bottom: 15px; border-radius: 4px;
+        font-size: 13px; color: #333; line-height: 1.5;
+        white-space: nowrap; box-sizing: border-box; width: 100%;
     }
     .info-dnes .info-datum { font-size: 14px; font-weight: bold; color: #2a5f94; margin-bottom: 4px; }
     .info-dnes .info-mena { font-weight: bold; color: #1a3a6b; }
     .info-dnes .info-ziadne { font-style: italic; color: #999; }
 
-    #tabulkaMesiaca {
-        display: table;
-        width: 100%;
-    }
+    #tabulkaMesiaca { display: table; width: 100%; }
 
     .skryte { display: none !important; }
 
     /* ===== MODÁLNE OKNO ===== */
     .modal-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-        animation: fadeIn 0.15s ease-out;
+        position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5);
+        display: flex; align-items: center; justify-content: center;
+        z-index: 1000; animation: fadeIn 0.15s ease-out;
     }
     .modal-overlay.skryte { display: none !important; }
-
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to   { opacity: 1; }
-    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
     .modal-box {
-        background: #fff;
-        border-radius: 10px;
+        background: #fff; border-radius: 10px;
         box-shadow: 0 10px 40px rgba(0,0,0,0.3);
         padding: 20px 22px 18px 22px;
-        min-width: 320px;
-        max-width: 90vw;
+        min-width: 320px; max-width: 90vw;
         animation: slideUp 0.18s ease-out;
     }
     @keyframes slideUp {
@@ -211,126 +174,127 @@
         to   { transform: translateY(0);    opacity: 1; }
     }
 
-    .modal-title {
-        font-size: 15px;
-        font-weight: bold;
-        color: #1a3a6b;
-        margin: 0 0 4px 0;
-    }
-    .modal-subtitle {
-        font-size: 12px;
-        color: #666;
-        margin: 0 0 16px 0;
-    }
+    .modal-title { font-size: 15px; font-weight: bold; color: #1a3a6b; margin: 0 0 4px 0; }
+    .modal-subtitle { font-size: 12px; color: #666; margin: 0 0 16px 0; }
     .modal-subtitle strong { color: #333; }
 
-    .modal-options {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-    }
+    .modal-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
     .modal-options button {
-        padding: 14px 0;
-        font-size: 20px;
-        font-weight: bold;
-        border: 2px solid #4a90d9;
-        background: #f4f8ff;
-        color: #1a3a6b;
-        border-radius: 8px;
-        cursor: pointer;
-        transition: all 0.15s;
-        line-height: 1;
+        padding: 14px 0; font-size: 20px; font-weight: bold;
+        border: 2px solid #4a90d9; background: #f4f8ff; color: #1a3a6b;
+        border-radius: 8px; cursor: pointer; transition: all 0.15s; line-height: 1;
     }
     .modal-options button:hover {
-        background: #4a90d9;
-        color: #fff;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 10px rgba(74,144,217,0.35);
+        background: #4a90d9; color: #fff;
+        transform: translateY(-1px); box-shadow: 0 4px 10px rgba(74,144,217,0.35);
     }
-    .modal-options button:active {
-        transform: translateY(0);
-    }
+    .modal-options button:active { transform: translateY(0); }
     .modal-options button.aktualny {
-        border-color: #f0c419;
-        background: #fff8d9;
+        border-color: #f0c419; background: #fff8d9;
         box-shadow: 0 0 0 2px #f0c419 inset;
     }
-    .modal-options button.aktualny:hover {
-        background: #f0c419;
-        color: #000;
-    }
+    .modal-options button.aktualny:hover { background: #f0c419; color: #000; }
 
     .modal-options .btn-zmazat {
-        grid-column: 1 / -1;
-        font-size: 14px;
-        padding: 11px 0;
-        border-color: #d9534f;
-        background: #fdf3f3;
-        color: #a94442;
-        margin-top: 4px;
+        grid-column: 1 / -1; font-size: 14px; padding: 11px 0;
+        border-color: #d9534f; background: #fdf3f3; color: #a94442; margin-top: 4px;
     }
     .modal-options .btn-zmazat:hover {
-        background: #d9534f;
-        color: #fff;
-        box-shadow: 0 4px 10px rgba(217,83,79,0.35);
+        background: #d9534f; color: #fff; box-shadow: 0 4px 10px rgba(217,83,79,0.35);
     }
     .modal-options .btn-zmazat.aktualny {
-        border-color: #f0c419;
-        background: #fff8d9;
-        color: #a94442;
+        border-color: #f0c419; background: #fff8d9; color: #a94442;
         box-shadow: 0 0 0 2px #f0c419 inset;
     }
 
-    .modal-footer {
-        margin-top: 14px;
-        text-align: right;
-    }
+    .modal-footer { margin-top: 14px; text-align: right; }
     .modal-footer .btn-zrusit {
-        background: transparent;
-        border: none;
-        color: #666;
-        font-size: 13px;
-        cursor: pointer;
-        padding: 6px 10px;
-        border-radius: 6px;
+        background: transparent; border: none; color: #666;
+        font-size: 13px; cursor: pointer; padding: 6px 10px; border-radius: 6px;
     }
-    .modal-footer .btn-zrusit:hover {
-        background: #f0f0f0;
-        color: #333;
+    .modal-footer .btn-zrusit:hover { background: #f0f0f0; color: #333; }
+
+    /* ===== MODÁLNE OKNO – PRIDANIE ČLENA ===== */
+    .modal-forma {
+        display: flex; flex-direction: column; gap: 12px;
     }
+    .modal-forma label {
+        font-size: 12px; font-weight: bold; color: #333;
+        display: flex; flex-direction: column; gap: 4px;
+    }
+    .modal-forma input {
+        padding: 10px 12px; font-size: 14px;
+        border: 2px solid #cfe0f5; border-radius: 8px;
+        outline: none; transition: border-color 0.15s;
+        font-family: inherit;
+    }
+    .modal-forma input:focus { border-color: #4a90d9; }
+    .modal-forma .btn-ulozit {
+        margin-top: 8px; padding: 12px 0;
+        font-size: 15px; font-weight: bold;
+        border: none; border-radius: 8px;
+        background: #2e9e4f; color: #fff;
+        cursor: pointer; transition: background-color 0.15s;
+    }
+    .modal-forma .btn-ulozit:hover { background: #25823f; }
+    .modal-forma .btn-ulozit:disabled { background: #a0a0a0; cursor: wait; }
+    .modal-forma .chyba-msg {
+        color: #a94442; font-size: 12px; font-weight: bold;
+        min-height: 16px; margin-top: -4px;
+    }
+
+    /* ===== ZELENÉ OKRÚHLE TLAČIDLO + ===== */
+    .btn-pridat-wrap {
+        display: table-row;
+    }
+    .btn-pridat-wrap > .btn-pridat-vnutor {
+        padding: 18px 0 6px 0;
+        text-align: left;
+    }
+    .btn-pridat {
+        width: 48px; height: 48px; border-radius: 50%;
+        background: #2e9e4f; color: #fff; border: none;
+        font-size: 28px; font-weight: bold; line-height: 1;
+        cursor: pointer; box-shadow: 0 4px 12px rgba(46,158,79,0.4);
+        transition: all 0.15s;
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 0;
+    }
+    .btn-pridat:hover {
+        background: #25823f; transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(46,158,79,0.5);
+    }
+    .btn-pridat:active { transform: translateY(0); }
+
+    /* ===== DRUHÁ TABUĽKA ===== */
+    .druha-tabulka-nadpis {
+        display: table-row;
+        white-space: nowrap;
+    }
+    .druha-tabulka-nadpis > div {
+        margin: 30px 0 12px 0;
+        font-size: 16px; font-weight: bold; color: #1a3a6b;
+        border-top: 2px solid #e0e0e0; padding-top: 20px;
+    }
+    #tabulkaNova { display: table; width: 100%; }
 
     /* ===== CELOOBRAZOVKA NAČÍTAVANIA ===== */
     .loading-overlay {
-        position: fixed;
-        inset: 0;
-        background: #ffffff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 2000;
-        animation: fadeIn 0.2s ease-out;
+        position: fixed; inset: 0; background: #ffffff;
+        display: flex; align-items: center; justify-content: center;
+        z-index: 2000; animation: fadeIn 0.2s ease-out;
     }
     .loading-overlay.skryte { display: none !important; }
     .loading-overlay .loading-text {
-        font-size: 18px;
-        font-weight: bold;
-        color: #4a90d9;
-        display: flex;
-        align-items: center;
-        gap: 12px;
+        font-size: 18px; font-weight: bold; color: #4a90d9;
+        display: flex; align-items: center; gap: 12px;
     }
     .loading-overlay .loading-text::before {
-        content: "";
-        width: 22px;
-        height: 22px;
-        border: 3px solid #cfe0f5;
-        border-top-color: #4a90d9;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
+        content: ""; width: 22px; height: 22px;
+        border: 3px solid #cfe0f5; border-top-color: #4a90d9;
+        border-radius: 50%; animation: spin 0.8s linear infinite;
     }
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 </style>
 <body>
 
@@ -350,9 +314,28 @@
         <div class="info-vnutor"></div>
     </div>
 
+    <!-- PÔVODNÁ TABUĽKA (turnus) -->
     <table id="tabulkaMesiaca">
         <thead><tr id="hlavicka"></tr></thead>
         <tbody id="telo"></tbody>
+    </table>
+
+    <!-- ZELENÉ TLAČIDLO + -->
+    <div class="btn-pridat-wrap">
+        <div class="btn-pridat-vnutor">
+            <button type="button" class="btn-pridat" id="btnPridatClena" title="Pridať nového člena">+</button>
+        </div>
+    </div>
+
+    <!-- NADPIS NOVEJ TABUĽKY -->
+    <div class="druha-tabulka-nadpis">
+        <div>Noví členovia (bez turnusu)</div>
+    </div>
+
+    <!-- NOVÁ TABUĽKA (členovia z Google Sheets, bez turnusu) -->
+    <table id="tabulkaNova">
+        <thead><tr id="hlavickaNova"></tr></thead>
+        <tbody id="teloNova"></tbody>
     </table>
 
 </div>
@@ -367,13 +350,38 @@
     <div class="modal-box" role="dialog" aria-modal="true">
         <div class="modal-title" id="modalNadpis">Vyber znak</div>
         <div class="modal-subtitle" id="modalPodnadpis"></div>
-
-        <div class="modal-options" id="modalMoznosti">
-            <!-- Tlačidlá sa generujú dynamicky -->
-        </div>
-
+        <div class="modal-options" id="modalMoznosti"></div>
         <div class="modal-footer">
             <button type="button" class="btn-zrusit" id="modalZrusit">Zrušiť</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODÁLNE OKNO PRE PRIDANIE ČLENA ===== -->
+<div id="modalPridat" class="modal-overlay skryte">
+    <div class="modal-box" role="dialog" aria-modal="true">
+        <div class="modal-title">Pridať nového člena</div>
+        <div class="modal-subtitle">Údaje sa uložia do Google tabuľky (hárok <strong>Clenovia</strong>).</div>
+
+        <form class="modal-forma" id="formPridat" autocomplete="off">
+            <label>
+                Meno
+                <input type="text" id="inputMeno" required maxlength="50">
+            </label>
+            <label>
+                Priezvisko
+                <input type="text" id="inputPriezvisko" required maxlength="50">
+            </label>
+            <label>
+                Osobné číslo
+                <input type="text" id="inputOsobneCislo" maxlength="30">
+            </label>
+            <div class="chyba-msg" id="chybaPridat"></div>
+            <button type="submit" class="btn-ulozit" id="btnUlozitClena">Uložiť</button>
+        </form>
+
+        <div class="modal-footer">
+            <button type="button" class="btn-zrusit" id="modalPridatZrusit">Zrušiť</button>
         </div>
     </div>
 </div>
@@ -397,6 +405,7 @@
     const JSONP_MAX_POKUSOV = 3;
     const POST_OVERENIE_MS = 3000;
 
+    // Pôvodný pevný zoznam (s turnusom)
     const clenovia = [
         { meno: "Ján Lukáč",        posun: 0 },
         { meno: "Viktor Imrišek",   posun: 1 },
@@ -407,6 +416,9 @@
         { meno: "Vladimír Staník",  posun: 6 },
         { meno: "Dávid Materlin",   posun: 7 }
     ];
+
+    // Nový zoznam z Google Sheets (bez turnusu)
+    let noviClenovia = [];
 
     const nazvyMesiaca = [
         "január","február","marec","apríl","máj","jún",
@@ -448,7 +460,6 @@
                 String(datum.getMonth() + 1).padStart(2, "0"),
                 String(datum.getDate()).padStart(2, "0")].join("-");
         }
-        console.warn("Nepodarilo sa normalizovať dátum:", s);
         return s;
     }
 
@@ -472,9 +483,10 @@
         return znakPreDen(clen, rok, mesiac, den);
     }
 
-    function jeManualneVypnuty(clen, rok, mesiac, den) {
+    // Pre nových členov – žiadny turnus, len manuálne zmeny
+    function efektivnyZnakNovy(clen, rok, mesiac, den) {
         const zmena = najdiManualnuZmenu(clen.meno, rok, mesiac, den);
-        return !!(zmena && (zmena.novyZnak === "-" || zmena.novyZnak === ""));
+        return zmena ? zmena.novyZnak : "";
     }
 
     function jeDnes(rok, mesiac, den) {
@@ -489,11 +501,8 @@
 
     function aktualizujTlacidloPredchadzajuci() {
         const btn = document.getElementById("btnPredchadzajuci");
-        if (jeAktualnyMesiac()) {
-            btn.classList.add("skryte");
-        } else {
-            btn.classList.remove("skryte");
-        }
+        if (jeAktualnyMesiac()) btn.classList.add("skryte");
+        else btn.classList.remove("skryte");
     }
 
     function jeDenAktivny(clen, rok, mesiac, den) {
@@ -521,7 +530,6 @@
             td.style.backgroundColor = "#fff3b0";
             return;
         }
-
         td.style.backgroundImage =
             "linear-gradient(to right, " +
             "#ffffff 0%, #ffffff " + zaciatok + "%, " +
@@ -530,7 +538,7 @@
         td.style.backgroundColor = "transparent";
     }
 
-    // ===== CELOOBRAZOVKA NAČÍTAVANIA =====
+    // ===== LOADING =====
     const loadingOverlay = document.getElementById("loadingOverlay");
     const obsahWrap      = document.getElementById("obsahWrap");
 
@@ -546,7 +554,7 @@
         document.getElementById("btnNasledujuci").disabled = ano;
     }
 
-    // ===== MODÁLNE OKNO =====
+    // ===== MODÁLNE OKNO – VÝBER ZNAKU =====
     const modalEl      = document.getElementById("modalVyber");
     const modalNadpis  = document.getElementById("modalNadpis");
     const modalPodnadp = document.getElementById("modalPodnadpis");
@@ -559,7 +567,6 @@
         modalNadpis.textContent = nadpis;
         modalPodnadp.innerHTML = podnadpis || "";
         modalCallback = onVyber;
-
         modalMoznosti.innerHTML = "";
 
         ZNAKY_V_MODALE.forEach(znak => {
@@ -596,93 +603,183 @@
         modalCallback = null;
     }
 
-    modalEl.addEventListener("click", (e) => {
-        if (e.target === modalEl) zatvorModal();
-    });
+    modalEl.addEventListener("click", (e) => { if (e.target === modalEl) zatvorModal(); });
     modalZrusit.addEventListener("click", zatvorModal);
     document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && !modalEl.classList.contains("skryte")) {
-            zatvorModal();
-        }
+        if (e.key === "Escape" && !modalEl.classList.contains("skryte")) zatvorModal();
     });
 
-    // ===== NAČÍTANIE Z GOOGLE SHEETS (JSONP s retry) =====
-    function nacitajZmenyZoSheets(pokus = 1) {
-        return new Promise((resolve) => {
+    // ===== MODÁLNE OKNO – PRIDANIE ČLENA =====
+    const modalPridat   = document.getElementById("modalPridat");
+    const modalPridatZrusit = document.getElementById("modalPridatZrusit");
+    const formPridat    = document.getElementById("formPridat");
+    const inputMeno     = document.getElementById("inputMeno");
+    const inputPriezvisko = document.getElementById("inputPriezvisko");
+    const inputOsobneCislo = document.getElementById("inputOsobneCislo");
+    const chybaPridat  = document.getElementById("chybaPridat");
+    const btnUlozitClena = document.getElementById("btnUlozitClena");
+
+    function otvorModalPridat() {
+        formPridat.reset();
+        chybaPridat.textContent = "";
+        btnUlozitClena.disabled = false;
+        btnUlozitClena.textContent = "Uložiť";
+        modalPridat.classList.remove("skryte");
+        setTimeout(() => inputMeno.focus(), 50);
+    }
+
+    function zatvorModalPridat() {
+        modalPridat.classList.add("skryte");
+    }
+
+    modalPridat.addEventListener("click", (e) => { if (e.target === modalPridat) zatvorModalPridat(); });
+    modalPridatZrusit.addEventListener("click", zatvorModalPridat);
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !modalPridat.classList.contains("skryte")) zatvorModalPridat();
+    });
+
+    document.getElementById("btnPridatClena").addEventListener("click", otvorModalPridat);
+
+    formPridat.addEventListener("submit", (e) => {
+        e.preventDefault();
+        chybaPridat.textContent = "";
+
+        const meno = inputMeno.value.trim();
+        const priezvisko = inputPriezvisko.value.trim();
+        const osobne = inputOsobneCislo.value.trim();
+
+        if (!meno) { chybaPridat.textContent = "Zadaj meno."; inputMeno.focus(); return; }
+        if (!priezvisko) { chybaPridat.textContent = "Zadaj priezvisko."; inputPriezvisko.focus(); return; }
+
+        btnUlozitClena.disabled = true;
+        btnUlozitClena.textContent = "Ukladám…";
+
+        ulozNovehoClena(meno, priezvisko, osobne)
+            .then(() => {
+                zatvorModalPridat();
+                return obnovAVykresli(true);
+            })
+            .catch((err) => {
+                chybaPridat.textContent = "Chyba: " + err.message;
+                btnUlozitClena.disabled = false;
+                btnUlozitClena.textContent = "Uložiť";
+            });
+    });
+
+    function ulozNovehoClena(meno, priezvisko, osobneCislo) {
+        return new Promise((resolve, reject) => {
+            const form = document.createElement("form");
+            form.method = "POST";
+            form.action = API_URL;
+            form.target = "skrytyIframe";
+            form.style.display = "none";
+
+            const polia = {
+                akcia: "pridajClena",
+                meno: meno,
+                priezvisko: priezvisko,
+                osobneCislo: osobneCislo
+            };
+            for (const key in polia) {
+                const input = document.createElement("input");
+                input.type = "hidden";
+                input.name = key;
+                input.value = polia[key];
+                form.appendChild(input);
+            }
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+
+            // Predpokladáme úspech – po POST_OVERENIE_MS sa obnoví tabuľka
+            // a ak by zlyhalo, užívateľ to uvidí v zozname.
+            setTimeout(resolve, POST_OVERENIE_MS);
+        });
+    }
+
+    // ===== NAČÍTANIE ZO SHEETS =====
+    function jsonp(url, pokus = 1) {
+        return new Promise((resolve, reject) => {
             const callbackName = "jsonpCb_" + Date.now() + "_" + Math.random().toString(36).slice(2);
             const script = document.createElement("script");
             let hotovo = false;
 
-            const dokonci = (uspech) => {
+            const dokonci = (uspech, data) => {
                 if (hotovo) return;
                 hotovo = true;
                 clearTimeout(timeout);
                 try { delete window[callbackName]; } catch (e) {}
                 try { script.remove(); } catch (e) {}
-
-                if (uspech) {
-                    resolve();
-                    return;
-                }
-                if (pokus < JSONP_MAX_POKUSOV) {
-                    console.warn(`JSONP pokus ${pokus} zlyhal, skúšam znova...`);
+                if (uspech) resolve(data);
+                else if (pokus < JSONP_MAX_POKUSOV) {
                     setTimeout(() => {
-                        nacitajZmenyZoSheets(pokus + 1).then(resolve);
+                        jsonp(url, pokus + 1).then(resolve).catch(reject);
                     }, 500 * pokus);
                 } else {
-                    console.warn("JSONP: maximálny počet pokusov vyčerpaný.");
-                    resolve();
+                    reject(new Error("JSONP zlyhalo po " + JSONP_MAX_POKUSOV + " pokusoch."));
                 }
             };
 
-            const timeout = setTimeout(() => {
-                console.warn(`JSONP timeout po ${JSONP_TIMEOUT_MS}ms (pokus ${pokus}).`);
-                dokonci(false);
-            }, JSONP_TIMEOUT_MS);
+            const timeout = setTimeout(() => dokonci(false), JSONP_TIMEOUT_MS);
 
             window[callbackName] = function(data) {
-                console.log("Surové dáta z JSONP:", data);
-                try {
-                    if (data && !Array.isArray(data) && data.result === "error") {
-                        console.error("Server error:", data.message);
-                        zmenyDatabaza = [];
-                    } else if (Array.isArray(data)) {
-                        zmenyDatabaza = data.map(z => {
-                            let datum, meno, den, novyZnak;
-                            if (Array.isArray(z)) {
-                                datum = z[0]; meno = z[1]; den = z[2]; novyZnak = z[3];
-                            } else {
-                                datum = z.datum; meno = z.meno; den = z.den; novyZnak = z.novyZnak;
-                            }
-                            return {
-                                datum: normalizujDatum(datum),
-                                meno: String(meno || "").trim(),
-                                den: den,
-                                novyZnak: (novyZnak == null ? "" : String(novyZnak))
-                            };
-                        });
-                        console.log("Načítaných zmien:", zmenyDatabaza.length, zmenyDatabaza);
-                    } else {
-                        console.warn("Neočakávaný formát:", data);
-                        zmenyDatabaza = [];
-                    }
-                } catch (e) {
-                    console.error("Chyba spracovania JSONP:", e);
-                    zmenyDatabaza = [];
-                }
-                dokonci(true);
+                dokonci(true, data);
             };
 
-            script.onerror = function() {
-                console.error("JSONP načítanie zlyhalo (onerror).");
-                dokonci(false);
-            };
+            script.onerror = function() { dokonci(false); };
 
-            script.src = API_URL
-                + "?callback=" + callbackName
+            script.src = url
+                + (url.indexOf("?") >= 0 ? "&" : "?")
+                + "callback=" + callbackName
                 + "&_=" + Date.now()
                 + "&r=" + Math.random().toString(36).slice(2);
             document.body.appendChild(script);
+        });
+    }
+
+    function nacitajZmenyZoSheets() {
+        return jsonp(API_URL).then(data => {
+            if (data && !Array.isArray(data) && data.result === "error") {
+                console.error("Server error:", data.message);
+                zmenyDatabaza = [];
+                return;
+            }
+            if (Array.isArray(data)) {
+                zmenyDatabaza = data.map(z => {
+                    let datum, meno, den, novyZnak;
+                    if (Array.isArray(z)) {
+                        datum = z[0]; meno = z[1]; den = z[2]; novyZnak = z[3];
+                    } else {
+                        datum = z.datum; meno = z.meno; den = z.den; novyZnak = z.novyZnak;
+                    }
+                    return {
+                        datum: normalizujDatum(datum),
+                        meno: String(meno || "").trim(),
+                        den: den,
+                        novyZnak: (novyZnak == null ? "" : String(novyZnak))
+                    };
+                });
+            } else {
+                zmenyDatabaza = [];
+            }
+        });
+    }
+
+    function nacitajNovychClenovZoSheets() {
+        return jsonp(API_URL + "?typ=clenovia").then(data => {
+            if (data && !Array.isArray(data) && data.result === "error") {
+                console.error("Server error (členovia):", data.message);
+                noviClenovia = [];
+                return;
+            }
+            if (Array.isArray(data)) {
+                noviClenovia = data.map(c => ({
+                    meno: String(c.meno || "").trim(),
+                    osobneCislo: String(c.osobneCislo || "").trim()
+                })).filter(c => c.meno);
+            } else {
+                noviClenovia = [];
+            }
         });
     }
 
@@ -703,11 +800,8 @@
         document.body.appendChild(form);
         form.submit();
         document.body.removeChild(form);
-        console.log("POST odoslaný:", polia);
 
-        setTimeout(() => {
-            obnovAVykresli(true);
-        }, POST_OVERENIE_MS);
+        setTimeout(() => { obnovAVykresli(true); }, POST_OVERENIE_MS);
     }
 
     function aktualizujInfoDnes() {
@@ -730,13 +824,11 @@
             '<div><span class="info-mena">' + menaHtml + '</span></div>';
     }
 
+    // ===== VYKRESLENIE PÔVODNEJ TABUĽKY (s turnusom) =====
     function vykresliTabulku() {
-        console.log("Vykresľujem tabuľku, zmien v DB:", zmenyDatabaza.length);
-
         aktualizujTlacidloPredchadzajuci();
 
         const pocetDni = new Date(zobrazenyRok, zobrazenyMesiac + 1, 0).getDate();
-
         const jeAktualny = jeAktualnyMesiac();
         const startDen = jeAktualny ? dnes.getDate() : 1;
 
@@ -746,13 +838,13 @@
             nazvyMesiaca[zobrazenyMesiac].charAt(0).toUpperCase() +
             nazvyMesiaca[zobrazenyMesiac].slice(1) + " " + zobrazenyRok;
 
+        // Hlavička pôvodnej tabuľky
         const hlavicka = document.getElementById("hlavicka");
         hlavicka.innerHTML = "";
         const thMeno = document.createElement("th");
         thMeno.className = "name-col";
         thMeno.textContent = "Meno a priezvisko";
         hlavicka.appendChild(thMeno);
-
         for (let d = startDen; d <= pocetDni; d++) {
             const datum = new Date(zobrazenyRok, zobrazenyMesiac, d);
             const denTyzna = datum.getDay();
@@ -776,27 +868,20 @@
             const tdMeno = document.createElement("td");
             tdMeno.className = "name-col";
             tdMeno.textContent = clen.meno;
-
-            if (dnesVZobrazenom) {
-                if (jeDenAktivny(clen, zobrazenyRok, zobrazenyMesiac, dnesDen)) {
-                    tdMeno.classList.add("name-col-aktivny");
-                }
+            if (dnesVZobrazenom && jeDenAktivny(clen, zobrazenyRok, zobrazenyMesiac, dnesDen)) {
+                tdMeno.classList.add("name-col-aktivny");
             }
             tr.appendChild(tdMeno);
 
             let d = startDen;
 
-            // ===== OPRAVA: ak deň 1 patrí do noci z minulého mesiaca,
-            // vykreslíme ho ako samostatnú bunku "Ↄ" (JEDEN stĺpec = deň 1)
-            // a while začína od d = 2. Tým pádom riadok vždy obsahuje
-            // presne toľko buniek, koľko má hlavička stĺpcov. =====
+            // Ↄ pre deň 1 (noc z minulého mesiaca)
             if (d === 1) {
                 const predchDatum = new Date(zobrazenyRok, zobrazenyMesiac, 0);
                 const poslednyDenMinuleho = efektivnyZnak(
                     clen, predchDatum.getFullYear(),
                     predchDatum.getMonth(), predchDatum.getDate()
                 );
-
                 if (poslednyDenMinuleho === "O") {
                     const td = document.createElement("td");
                     td.textContent = "Ↄ";
@@ -831,7 +916,6 @@
                     const dalsiZnak = (dalsiDen <= pocetDni)
                         ? efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, dalsiDen)
                         : null;
-
                     if (dalsiZnak === "O" && d + 2 <= pocetDni) {
                         td.colSpan = 3;
                         td.classList.add("turnus-OO");
@@ -843,7 +927,6 @@
                         d += 3;
                         continue;
                     }
-
                     td.colSpan = 2;
                     td.classList.add("turnus-O-single");
                     td.textContent = "";
@@ -886,25 +969,81 @@
         aktualizujInfoDnes();
     }
 
+    // ===== VYKRESLENIE NOVEJ TABUĽKY (bez turnusu) =====
+    function vykresliNovuTabulku() {
+        const pocetDni = new Date(zobrazenyRok, zobrazenyMesiac + 1, 0).getDate();
+        const jeAktualny = jeAktualnyMesiac();
+        const startDen = jeAktualny ? dnes.getDate() : 1;
+
+        const hlavicka = document.getElementById("hlavickaNova");
+        hlavicka.innerHTML = "";
+        const thMeno = document.createElement("th");
+        thMeno.className = "name-col";
+        thMeno.textContent = "Meno a priezvisko";
+        hlavicka.appendChild(thMeno);
+        for (let d = startDen; d <= pocetDni; d++) {
+            const datum = new Date(zobrazenyRok, zobrazenyMesiac, d);
+            const denTyzna = datum.getDay();
+            const th = document.createElement("th");
+            if (denTyzna === 0 || denTyzna === 6) th.classList.add("weekend-header");
+            if (jeDnes(zobrazenyRok, zobrazenyMesiac, d)) th.classList.add("dnes-stlpec-hlavicka");
+            th.innerHTML = d + "<br>" + skratkyDni[denTyzna];
+            hlavicka.appendChild(th);
+        }
+
+        const telo = document.getElementById("teloNova");
+        telo.innerHTML = "";
+
+        if (noviClenovia.length === 0) {
+            const tr = document.createElement("tr");
+            const td = document.createElement("td");
+            td.colSpan = 1 + (pocetDni - startDen + 1);
+            td.style.padding = "12px";
+            td.style.color = "#999";
+            td.style.fontStyle = "italic";
+            td.textContent = "Zatiaľ žiadni noví členovia. Pridaj ich tlačidlom + vyššie.";
+            tr.appendChild(td);
+            telo.appendChild(tr);
+            return;
+        }
+
+        noviClenovia.forEach(clen => {
+            const tr = document.createElement("tr");
+
+            const tdMeno = document.createElement("td");
+            tdMeno.className = "name-col";
+            tdMeno.textContent = clen.meno;
+            tr.appendChild(tdMeno);
+
+            for (let d = startDen; d <= pocetDni; d++) {
+                const td = document.createElement("td");
+                const znak = efektivnyZnakNovy(clen, zobrazenyRok, zobrazenyMesiac, d);
+                td.textContent = znak;
+                if (znak && ZNAKY_DEN.includes(znak)) td.classList.add("turnus-den");
+                if (jeDnes(zobrazenyRok, zobrazenyMesiac, d)) td.classList.add("dnes-stlpec");
+                pridelKlikHandler(td, clen, d, znak);
+                tr.appendChild(td);
+            }
+            telo.appendChild(tr);
+        });
+    }
+
     function zapisZmenu(clen, den, znak) {
         const datumStr = datumString(zobrazenyRok, zobrazenyMesiac, den);
-
         zmenyDatabaza = zmenyDatabaza.filter(
             z => !(z.datum === datumStr && z.meno === clen.meno)
         );
         zmenyDatabaza.push({
             datum: datumStr, meno: clen.meno, den: den, novyZnak: znak
         });
-
         ulozZmenuDoSheets(datumStr, clen.meno, den, znak);
         vykresliTabulku();
+        vykresliNovuTabulku();
     }
 
     function pridelKlikHandler(td, clen, den, aktualnyZnak) {
         td.style.cursor = "pointer";
-        td.title = (td.title ? td.title + " | " : "") +
-            "Klikni pre zmenu. Aktuálne: '" + (aktualnyZnak || "prázdne") + "'";
-
+        td.title = "Klikni pre zmenu. Aktuálne: '" + (aktualnyZnak || "prázdne") + "'";
         td.addEventListener("click", () => {
             otvorModal(
                 "Vyber znak",
@@ -918,15 +1057,11 @@
 
     function pridelKlikHandlerPreSingle(td, clen, den1, den2) {
         td.style.cursor = "pointer";
-        td.title = (td.title ? td.title + " | " : "") +
-            "Klikni: ľavá časť = deň " + den1 + " (začiatok noci), pravá časť = deň " + den2 + " (koniec noci).";
-
         td.addEventListener("click", (event) => {
             const rect = td.getBoundingClientRect();
             const relativnaX = (event.clientX - rect.left) / rect.width;
             const den = (relativnaX < 0.5) ? den1 : den2;
             const aktualnyZnak = efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, den);
-
             otvorModal(
                 "Vyber znak",
                 "Pre <strong>" + clen.meno + "</strong>, deň <strong>" + den + "</strong> ("
@@ -939,9 +1074,6 @@
 
     function pridelKlikHandlerPreOO(td, clen, den1, den2, den3) {
         td.style.cursor = "pointer";
-        td.title = (td.title ? td.title + " | " : "") +
-            "Klikni: ľavá časť = deň " + den1 + ", stred = deň " + den2 + ", pravá časť = deň " + den3 + ".";
-
         td.addEventListener("click", (event) => {
             const rect = td.getBoundingClientRect();
             const relativnaX = (event.clientX - rect.left) / rect.width;
@@ -949,9 +1081,7 @@
             if (relativnaX < 1 / 3) den = den1;
             else if (relativnaX < 2 / 3) den = den2;
             else den = den3;
-
             const aktualnyZnak = efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, den);
-
             otvorModal(
                 "Vyber znak",
                 "Pre <strong>" + clen.meno + "</strong>, deň <strong>" + den + "</strong> ("
@@ -973,15 +1103,18 @@
 
         const mojeCislo = ++pocitadloPoziadaviek;
 
-        return nacitajZmenyZoSheets()
+        return Promise.all([
+            nacitajZmenyZoSheets(),
+            nacitajNovychClenovZoSheets()
+        ])
             .then(() => {
                 if (mojeCislo !== pocitadloPoziadaviek) return;
                 vykresliTabulku();
+                vykresliNovuTabulku();
             })
             .finally(() => {
                 nacitavaSa = false;
                 if (!silent) zobrazLoading(false);
-
                 if (cakajuciRefresh) {
                     cakajuciRefresh = false;
                     obnovAVykresli(silent);
