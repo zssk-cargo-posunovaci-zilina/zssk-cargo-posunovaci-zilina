@@ -395,10 +395,20 @@
         return s;
     }
 
+    // NOVÉ: normalizácia mena pre robustné porovnávanie
+    // – trim, viacnásobné medzery → jedna, case-insensitive
+    function normalizujMeno(meno) {
+        return String(meno == null ? "" : meno)
+            .trim()
+            .replace(/\s+/g, " ")
+            .toLowerCase();
+    }
+
     function najdiManualnuZmenu(meno, rok, mesiac, den) {
         const datumStr = datumString(rok, mesiac, den);
+        const hladaneMeno = normalizujMeno(meno);
         return [...zmenyDatabaza].reverse().find(
-            z => z.datum === datumStr && z.meno === meno
+            z => z.datum === datumStr && normalizujMeno(z.meno) === hladaneMeno
         );
     }
 
@@ -669,7 +679,7 @@
     function nacitajZmenyZoSheets() {
         return jsonp(API_URL).then(data => {
             if (data && !Array.isArray(data) && data.result === "error") {
-                console.error("Server error:", data.message);
+                console.error("Server error (zmeny):", data.message);
                 zmenyDatabaza = [];
                 return;
             }
@@ -688,6 +698,7 @@
                         novyZnak: (novyZnak == null ? "" : String(novyZnak))
                     };
                 });
+                console.log("Načítané zmeny:", zmenyDatabaza.length, zmenyDatabaza); // DEBUG
             } else {
                 zmenyDatabaza = [];
             }
@@ -706,6 +717,7 @@
                     meno: String(c.meno || "").trim(),
                     osobneCislo: String(c.osobneCislo || "").trim()
                 })).filter(c => c.meno);
+                console.log("Načítaní noví členovia:", noviClenovia.length, noviClenovia); // DEBUG
             } else {
                 noviClenovia = [];
             }
@@ -767,7 +779,6 @@
             nazvyMesiaca[zobrazenyMesiac].charAt(0).toUpperCase() +
             nazvyMesiaca[zobrazenyMesiac].slice(1) + " " + zobrazenyRok;
 
-        // Hlavička pôvodnej tabuľky
         const hlavicka = document.getElementById("hlavicka");
         hlavicka.innerHTML = "";
         const thMeno = document.createElement("th");
@@ -804,7 +815,6 @@
 
             let d = startDen;
 
-            // Ↄ pre deň 1 (noc z minulého mesiaca)
             if (d === 1) {
                 const predchDatum = new Date(zobrazenyRok, zobrazenyMesiac, 0);
                 const poslednyDenMinuleho = efektivnyZnak(
@@ -947,6 +957,10 @@
             for (let d = startDen; d <= pocetDni; d++) {
                 const td = document.createElement("td");
                 const znak = efektivnyZnakNovy(clen, zobrazenyRok, zobrazenyMesiac, d);
+                // DEBUG: ak pre nového člena existuje zmena, vypíšeme ju
+                if (znak) {
+                    console.log("Zmena pre nového člena:", clen.meno, "deň", d, "→", znak);
+                }
                 td.textContent = znak;
                 if (znak && ZNAKY_DEN.includes(znak)) td.classList.add("turnus-den");
                 if (jeDnes(zobrazenyRok, zobrazenyMesiac, d)) td.classList.add("dnes-stlpec");
@@ -1029,16 +1043,13 @@
         nacitavaSa = true;
         cakajuciRefresh = false;
         if (!silent) zobrazLoading(true);
-    
+
         const mojeCislo = ++pocitadloPoziadaviek;
-    
-        // POZOR: voláme POSTUPNE, nie Promise.all – Google Apps Script
-        // nezvládne dve súbežné JSONP požiadavky spoľahlivo.
+
+        // Postupné volanie (nie Promise.all) – Apps Script nezvládne
+        // dve súbežné JSONP požiadavky spoľahlivo.
         return nacitajZmenyZoSheets()
-            .then(() => {
-                // malá pauza, aby Apps Script stihol dokončiť prvú požiadavku
-                return new Promise(r => setTimeout(r, 300));
-            })
+            .then(() => new Promise(r => setTimeout(r, 300)))
             .then(() => nacitajNovychClenovZoSheets())
             .then(() => {
                 if (mojeCislo !== pocitadloPoziadaviek) return;
