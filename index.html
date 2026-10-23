@@ -172,9 +172,36 @@
     .info-dnes .info-mena { font-weight: bold; color: #1a3a6b; }
     .info-dnes .info-ziadne { font-style: italic; color: #999; }
 
+    /* ===== SCROLL OBAL PRE TABUĽKU – sticky prvý stĺpec ===== */
+    .tabulka-scroll {
+        overflow-x: auto;
+        overflow-y: visible;
+        max-width: 100%;
+        position: relative;
+    }
+
     #tabulkaMesiaca {
         display: table;
-        width: 100%;
+        /* Šírka podľa obsahu – aby sa dala skrolovať, keď je veľa dní */
+        width: auto;
+        min-width: 100%;
+    }
+
+    /* Sticky prvý stĺpec – hlavička aj telo */
+    #tabulkaMesiaca th.name-col,
+    #tabulkaMesiaca td.name-col {
+        position: sticky;
+        left: 0;
+        z-index: 5;
+    }
+    #tabulkaMesiaca th.name-col {
+        z-index: 7; /* hlavička musí byť nad telom */
+    }
+    /* Sticky "+" tieň, aby bol oddelený od skrolovaného obsahu */
+    #tabulkaMesiaca th.name-col,
+    #tabulkaMesiaca td.name-col {
+        box-shadow: 2px 0 4px -2px rgba(0,0,0,0.25);
+        border-right: 1px solid #ccc;
     }
 
     .skryte { display: none !important; }
@@ -350,10 +377,13 @@
         <div class="info-vnutor"></div>
     </div>
 
-    <table id="tabulkaMesiaca">
-        <thead><tr id="hlavicka"></tr></thead>
-        <tbody id="telo"></tbody>
-    </table>
+    <!-- Obal pre horizontálne skrolovanie so sticky prvým stĺpcom -->
+    <div class="tabulka-scroll">
+        <table id="tabulkaMesiaca">
+            <thead><tr id="hlavicka"></tr></thead>
+            <tbody id="telo"></tbody>
+        </table>
+    </div>
 
 </div>
 
