@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZSSK Cargo - posunovači Žilina</title>
+    <title>ZSSK Cargo - depo Žilina</title>
 <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
     table { border-collapse: collapse; font-size: 12px; }
@@ -248,25 +248,21 @@
         <div class="info-vnutor"></div>
     </div>
 
-    <!-- PÔVODNÁ TABUĽKA (turnus) -->
     <table id="tabulkaMesiaca">
         <thead><tr id="hlavicka"></tr></thead>
         <tbody id="telo"></tbody>
     </table>
 
-    <!-- ZELENÉ TLAČIDLO + -->
     <div class="btn-pridat-wrap">
         <div class="btn-pridat-vnutor">
             <button type="button" class="btn-pridat" id="btnPridatClena" title="Pridať nového člena">+</button>
         </div>
     </div>
 
-    <!-- NADPIS NOVEJ TABUĽKY -->
     <div class="druha-tabulka-nadpis">
         <div>Noví členovia (bez turnusu)</div>
     </div>
 
-    <!-- NOVÁ TABUĽKA (členovia z Google Sheets, bez turnusu) -->
     <table id="tabulkaNova">
         <thead><tr id="hlavickaNova"></tr></thead>
         <tbody id="teloNova"></tbody>
@@ -274,12 +270,10 @@
 
 </div>
 
-<!-- ===== CELOOBRAZOVKA NAČÍTAVANIA ===== -->
 <div id="loadingOverlay" class="loading-overlay skryte">
     <div class="loading-text">Načítavam…</div>
 </div>
 
-<!-- ===== MODÁLNE OKNO PRE VÝBER ZNAKU ===== -->
 <div id="modalVyber" class="modal-overlay skryte">
     <div class="modal-box" role="dialog" aria-modal="true">
         <div class="modal-title" id="modalNadpis">Vyber znak</div>
@@ -291,25 +285,15 @@
     </div>
 </div>
 
-<!-- ===== MODÁLNE OKNO PRE PRIDANIE ČLENA ===== -->
 <div id="modalPridat" class="modal-overlay skryte">
     <div class="modal-box" role="dialog" aria-modal="true">
         <div class="modal-title">Pridať nového člena</div>
         <div class="modal-subtitle">Údaje sa uložia do Google tabuľky (hárok <strong>Clenovia</strong>).</div>
 
         <form class="modal-forma" id="formPridat" autocomplete="off">
-            <label>
-                Meno
-                <input type="text" id="inputMeno" required maxlength="50">
-            </label>
-            <label>
-                Priezvisko
-                <input type="text" id="inputPriezvisko" required maxlength="50">
-            </label>
-            <label>
-                Osobné číslo
-                <input type="text" id="inputOsobneCislo" maxlength="30">
-            </label>
+            <label>Meno <input type="text" id="inputMeno" required maxlength="50"></label>
+            <label>Priezvisko <input type="text" id="inputPriezvisko" required maxlength="50"></label>
+            <label>Osobné číslo <input type="text" id="inputOsobneCislo" maxlength="30"></label>
             <div class="chyba-msg" id="chybaPridat"></div>
             <button type="submit" class="btn-ulozit" id="btnUlozitClena">Uložiť</button>
         </form>
@@ -395,8 +379,6 @@
         return s;
     }
 
-    // NOVÉ: normalizácia mena pre robustné porovnávanie
-    // – trim, viacnásobné medzery → jedna, case-insensitive
     function normalizujMeno(meno) {
         return String(meno == null ? "" : meno)
             .trim()
@@ -409,9 +391,7 @@
         const hladaneMeno = normalizujMeno(meno);
         return [...zmenyDatabaza].reverse().find(z => {
             if (normalizujMeno(z.meno) !== hladaneMeno) return false;
-            // Ak zmena má platný dátum, porovnávame presne.
             if (z.datum) return z.datum === datumStr;
-            // Ak zmena nemá dátum (starý zápis), porovnávame len číslo dňa.
             return Number(z.den) === Number(den);
         });
     }
@@ -429,6 +409,7 @@
         return znakPreDen(clen, rok, mesiac, den);
     }
 
+    // Pre nových členov – žiadny turnus, len manuálne zmeny
     function efektivnyZnakNovy(clen, rok, mesiac, den) {
         const zmena = najdiManualnuZmenu(clen.meno, rok, mesiac, den);
         return zmena ? zmena.novyZnak : "";
@@ -702,7 +683,7 @@
                         novyZnak: (novyZnak == null ? "" : String(novyZnak))
                     };
                 });
-                console.log("Načítané zmeny:", zmenyDatabaza.length, zmenyDatabaza); // DEBUG
+                console.log("Načítané zmeny:", zmenyDatabaza.length, zmenyDatabaza);
             } else {
                 zmenyDatabaza = [];
             }
@@ -721,7 +702,7 @@
                     meno: String(c.meno || "").trim(),
                     osobneCislo: String(c.osobneCislo || "").trim()
                 })).filter(c => c.meno);
-                console.log("Načítaní noví členovia:", noviClenovia.length, noviClenovia); // DEBUG
+                console.log("Načítaní noví členovia:", noviClenovia.length, noviClenovia);
             } else {
                 noviClenovia = [];
             }
@@ -769,6 +750,135 @@
             '<div><span class="info-mena">' + menaHtml + '</span></div>';
     }
 
+    // ===== SPOLOČNÁ HLAVIČKA PRE OBE TABUĽKY =====
+    function vykresliHlavicku(hlavickaId, startDen, pocetDni) {
+        const hlavicka = document.getElementById(hlavickaId);
+        hlavicka.innerHTML = "";
+        const thMeno = document.createElement("th");
+        thMeno.className = "name-col";
+        thMeno.textContent = "Meno a priezvisko";
+        hlavicka.appendChild(thMeno);
+        for (let d = startDen; d <= pocetDni; d++) {
+            const datum = new Date(zobrazenyRok, zobrazenyMesiac, d);
+            const denTyzna = datum.getDay();
+            const th = document.createElement("th");
+            if (denTyzna === 0 || denTyzna === 6) th.classList.add("weekend-header");
+            if (jeDnes(zobrazenyRok, zobrazenyMesiac, d)) th.classList.add("dnes-stlpec-hlavicka");
+            th.innerHTML = d + "<br>" + skratkyDni[denTyzna];
+            hlavicka.appendChild(th);
+        }
+    }
+
+    // ===== SPOLOČNÉ VYKRESLENIE RIADKU (turnus alebo nový člen) =====
+    // getZnak(clen, d) vráti znak pre daný deň
+    function vykresliRiadok(telo, clen, startDen, pocetDni, getZnak, menoClass) {
+        const tr = document.createElement("tr");
+
+        const tdMeno = document.createElement("td");
+        tdMeno.className = menoClass || "name-col";
+        tdMeno.textContent = clen.meno;
+        if (menoClass === "name-col") {
+            const dnesVZobrazenom =
+                dnes.getFullYear() === zobrazenyRok && dnes.getMonth() === zobrazenyMesiac;
+            if (dnesVZobrazenom && jeDenAktivny(clen, zobrazenyRok, zobrazenyMesiac, dnes.getDate())) {
+                tdMeno.classList.add("name-col-aktivny");
+            }
+        }
+        tr.appendChild(tdMeno);
+
+        let d = startDen;
+
+        // Ↄ pre deň 1 (noc z minulého mesiaca)
+        if (d === 1) {
+            const predchDatum = new Date(zobrazenyRok, zobrazenyMesiac, 0);
+            const poslednyDenMinuleho = getZnak(
+                clen, predchDatum.getFullYear(),
+                predchDatum.getMonth(), predchDatum.getDate()
+            );
+            if (poslednyDenMinuleho === "O") {
+                const td = document.createElement("td");
+                td.textContent = "Ↄ";
+                td.classList.add("turnus-C-rev");
+                td.title = "Deň 1: noc pokračuje z minulého mesiaca";
+                if (jeDnes(zobrazenyRok, zobrazenyMesiac, 1)) td.classList.add("dnes-stlpec");
+                pridelKlikHandler(td, clen, 1, "Ↄ");
+                tr.appendChild(td);
+                d = 2;
+            }
+        }
+
+        while (d <= pocetDni) {
+            const znak = getZnak(clen, zobrazenyRok, zobrazenyMesiac, d);
+            const datum = new Date(zobrazenyRok, zobrazenyMesiac, d);
+            const denTyzna = datum.getDay();
+            const td = document.createElement("td");
+
+            if (d === pocetDni && znak === "O") {
+                td.textContent = "C";
+                td.classList.add("turnus-C");
+                td.title = "Noc začína na konci mesiaca";
+                if (jeDnes(zobrazenyRok, zobrazenyMesiac, d)) td.classList.add("dnes-stlpec");
+                pridelKlikHandler(td, clen, d, "C");
+                tr.appendChild(td);
+                d += 1;
+                continue;
+            }
+
+            if (znak === "O") {
+                const dalsiDen = d + 1;
+                const dalsiZnak = (dalsiDen <= pocetDni)
+                    ? getZnak(clen, zobrazenyRok, zobrazenyMesiac, dalsiDen)
+                    : null;
+                if (dalsiZnak === "O" && d + 2 <= pocetDni) {
+                    td.colSpan = 3;
+                    td.classList.add("turnus-OO");
+                    td.textContent = "";
+                    td.title = "Dve nočné po sebe (deň " + d + " → deň " + (d + 2) + ")";
+                    nastavDnesZvyraznenie(td, d, d + 2);
+                    pridelKlikHandlerPreOO(td, clen, d, d + 1, d + 2);
+                    tr.appendChild(td);
+                    d += 3;
+                    continue;
+                }
+                td.colSpan = 2;
+                td.classList.add("turnus-O-single");
+                td.textContent = "";
+                td.title = "Noc (deň " + d + " → deň " + dalsiDen + ")";
+                nastavDnesZvyraznenie(td, d, dalsiDen);
+                pridelKlikHandlerPreSingle(td, clen, d, d + 1);
+                tr.appendChild(td);
+                d += 2;
+                continue;
+            }
+
+            if (znak === "-" || znak === "" || znak == null) {
+                td.textContent = "";
+                if (jeDnes(zobrazenyRok, zobrazenyMesiac, d)) td.classList.add("dnes-stlpec");
+                pridelKlikHandler(td, clen, d, znak || "");
+                tr.appendChild(td);
+                d += 1;
+                continue;
+            }
+
+            if (znak === "/" && DNI_BEZ_SIKMOVEJ.includes(denTyzna)) {
+                td.textContent = "";
+                if (jeDnes(zobrazenyRok, zobrazenyMesiac, d)) td.classList.add("dnes-stlpec");
+                pridelKlikHandler(td, clen, d, "");
+                tr.appendChild(td);
+                d += 1;
+                continue;
+            }
+
+            td.textContent = znak;
+            if (ZNAKY_DEN.includes(znak)) td.classList.add("turnus-den");
+            if (jeDnes(zobrazenyRok, zobrazenyMesiac, d)) td.classList.add("dnes-stlpec");
+            pridelKlikHandler(td, clen, d, znak);
+            tr.appendChild(td);
+            d += 1;
+        }
+        telo.appendChild(tr);
+    }
+
     // ===== VYKRESLENIE PÔVODNEJ TABUĽKY (s turnusom) =====
     function vykresliTabulku() {
         aktualizujTlacidloPredchadzajuci();
@@ -783,156 +893,25 @@
             nazvyMesiaca[zobrazenyMesiac].charAt(0).toUpperCase() +
             nazvyMesiaca[zobrazenyMesiac].slice(1) + " " + zobrazenyRok;
 
-        const hlavicka = document.getElementById("hlavicka");
-        hlavicka.innerHTML = "";
-        const thMeno = document.createElement("th");
-        thMeno.className = "name-col";
-        thMeno.textContent = "Meno a priezvisko";
-        hlavicka.appendChild(thMeno);
-        for (let d = startDen; d <= pocetDni; d++) {
-            const datum = new Date(zobrazenyRok, zobrazenyMesiac, d);
-            const denTyzna = datum.getDay();
-            const th = document.createElement("th");
-            if (denTyzna === 0 || denTyzna === 6) th.classList.add("weekend-header");
-            if (jeDnes(zobrazenyRok, zobrazenyMesiac, d)) th.classList.add("dnes-stlpec-hlavicka");
-            th.innerHTML = d + "<br>" + skratkyDni[denTyzna];
-            hlavicka.appendChild(th);
-        }
+        vykresliHlavicku("hlavicka", startDen, pocetDni);
 
         const telo = document.getElementById("telo");
         telo.innerHTML = "";
 
-        const dnesVZobrazenom =
-            dnes.getFullYear() === zobrazenyRok && dnes.getMonth() === zobrazenyMesiac;
-        const dnesDen = dnes.getDate();
-
         clenovia.forEach(clen => {
-            const tr = document.createElement("tr");
-
-            const tdMeno = document.createElement("td");
-            tdMeno.className = "name-col";
-            tdMeno.textContent = clen.meno;
-            if (dnesVZobrazenom && jeDenAktivny(clen, zobrazenyRok, zobrazenyMesiac, dnesDen)) {
-                tdMeno.classList.add("name-col-aktivny");
-            }
-            tr.appendChild(tdMeno);
-
-            let d = startDen;
-
-            if (d === 1) {
-                const predchDatum = new Date(zobrazenyRok, zobrazenyMesiac, 0);
-                const poslednyDenMinuleho = efektivnyZnak(
-                    clen, predchDatum.getFullYear(),
-                    predchDatum.getMonth(), predchDatum.getDate()
-                );
-                if (poslednyDenMinuleho === "O") {
-                    const td = document.createElement("td");
-                    td.textContent = "Ↄ";
-                    td.classList.add("turnus-C-rev");
-                    td.title = "Deň 1: noc pokračuje z minulého mesiaca";
-                    if (jeDnes(zobrazenyRok, zobrazenyMesiac, 1)) td.classList.add("dnes-stlpec");
-                    pridelKlikHandler(td, clen, 1, "Ↄ");
-                    tr.appendChild(td);
-                    d = 2;
-                }
-            }
-
-            while (d <= pocetDni) {
-                const znak = efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, d);
-                const datum = new Date(zobrazenyRok, zobrazenyMesiac, d);
-                const denTyzna = datum.getDay();
-                const td = document.createElement("td");
-
-                if (d === pocetDni && znak === "O") {
-                    td.textContent = "C";
-                    td.classList.add("turnus-C");
-                    td.title = "Noc začína na konci mesiaca";
-                    if (jeDnes(zobrazenyRok, zobrazenyMesiac, d)) td.classList.add("dnes-stlpec");
-                    pridelKlikHandler(td, clen, d, "C");
-                    tr.appendChild(td);
-                    d += 1;
-                    continue;
-                }
-
-                if (znak === "O") {
-                    const dalsiDen = d + 1;
-                    const dalsiZnak = (dalsiDen <= pocetDni)
-                        ? efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, dalsiDen)
-                        : null;
-                    if (dalsiZnak === "O" && d + 2 <= pocetDni) {
-                        td.colSpan = 3;
-                        td.classList.add("turnus-OO");
-                        td.textContent = "";
-                        td.title = "Dve nočné po sebe (deň " + d + " → deň " + (d + 2) + ")";
-                        nastavDnesZvyraznenie(td, d, d + 2);
-                        pridelKlikHandlerPreOO(td, clen, d, d + 1, d + 2);
-                        tr.appendChild(td);
-                        d += 3;
-                        continue;
-                    }
-                    td.colSpan = 2;
-                    td.classList.add("turnus-O-single");
-                    td.textContent = "";
-                    td.title = "Noc (deň " + d + " → deň " + dalsiDen + ")";
-                    nastavDnesZvyraznenie(td, d, dalsiDen);
-                    pridelKlikHandlerPreSingle(td, clen, d, d + 1);
-                    tr.appendChild(td);
-                    d += 2;
-                    continue;
-                }
-
-                if (znak === "-" || znak === "" || znak == null) {
-                    td.textContent = "";
-                    if (jeDnes(zobrazenyRok, zobrazenyMesiac, d)) td.classList.add("dnes-stlpec");
-                    pridelKlikHandler(td, clen, d, znak || "");
-                    tr.appendChild(td);
-                    d += 1;
-                    continue;
-                }
-
-                if (znak === "/" && DNI_BEZ_SIKMOVEJ.includes(denTyzna)) {
-                    td.textContent = "";
-                    if (jeDnes(zobrazenyRok, zobrazenyMesiac, d)) td.classList.add("dnes-stlpec");
-                    pridelKlikHandler(td, clen, d, "");
-                    tr.appendChild(td);
-                    d += 1;
-                    continue;
-                }
-
-                td.textContent = znak;
-                if (ZNAKY_DEN.includes(znak)) td.classList.add("turnus-den");
-                if (jeDnes(zobrazenyRok, zobrazenyMesiac, d)) td.classList.add("dnes-stlpec");
-                pridelKlikHandler(td, clen, d, znak);
-                tr.appendChild(td);
-                d += 1;
-            }
-            telo.appendChild(tr);
+            vykresliRiadok(telo, clen, startDen, pocetDni, efektivnyZnak, "name-col");
         });
 
         aktualizujInfoDnes();
     }
 
-    // ===== VYKRESLENIE NOVEJ TABUĽKY (bez turnusu) =====
+    // ===== VYKRESLENIE NOVEJ TABUĽKY (bez turnusu, len manuálne zmeny) =====
     function vykresliNovuTabulku() {
         const pocetDni = new Date(zobrazenyRok, zobrazenyMesiac + 1, 0).getDate();
         const jeAktualny = jeAktualnyMesiac();
         const startDen = jeAktualny ? dnes.getDate() : 1;
 
-        const hlavicka = document.getElementById("hlavickaNova");
-        hlavicka.innerHTML = "";
-        const thMeno = document.createElement("th");
-        thMeno.className = "name-col";
-        thMeno.textContent = "Meno a priezvisko";
-        hlavicka.appendChild(thMeno);
-        for (let d = startDen; d <= pocetDni; d++) {
-            const datum = new Date(zobrazenyRok, zobrazenyMesiac, d);
-            const denTyzna = datum.getDay();
-            const th = document.createElement("th");
-            if (denTyzna === 0 || denTyzna === 6) th.classList.add("weekend-header");
-            if (jeDnes(zobrazenyRok, zobrazenyMesiac, d)) th.classList.add("dnes-stlpec-hlavicka");
-            th.innerHTML = d + "<br>" + skratkyDni[denTyzna];
-            hlavicka.appendChild(th);
-        }
+        vykresliHlavicku("hlavickaNova", startDen, pocetDni);
 
         const telo = document.getElementById("teloNova");
         telo.innerHTML = "";
@@ -951,27 +930,11 @@
         }
 
         noviClenovia.forEach(clen => {
-            const tr = document.createElement("tr");
-
-            const tdMeno = document.createElement("td");
-            tdMeno.className = "name-col novy-riadok-meno";
-            tdMeno.textContent = clen.meno;
-            tr.appendChild(tdMeno);
-
-            for (let d = startDen; d <= pocetDni; d++) {
-                const td = document.createElement("td");
-                const znak = efektivnyZnakNovy(clen, zobrazenyRok, zobrazenyMesiac, d);
-                // DEBUG: ak pre nového člena existuje zmena, vypíšeme ju
-                if (znak) {
-                    console.log("Zmena pre nového člena:", clen.meno, "deň", d, "→", znak);
-                }
-                td.textContent = znak;
-                if (znak && ZNAKY_DEN.includes(znak)) td.classList.add("turnus-den");
-                if (jeDnes(zobrazenyRok, zobrazenyMesiac, d)) td.classList.add("dnes-stlpec");
-                pridelKlikHandler(td, clen, d, znak);
-                tr.appendChild(td);
-            }
-            telo.appendChild(tr);
+            vykresliRiadok(
+                telo, clen, startDen, pocetDni,
+                efektivnyZnakNovy,        // nový člen – len manuálne zmeny, žiadny turnus
+                "name-col novy-riadok-meno"
+            );
         });
     }
 
@@ -1008,7 +971,11 @@
             const rect = td.getBoundingClientRect();
             const relativnaX = (event.clientX - rect.left) / rect.width;
             const den = (relativnaX < 0.5) ? den1 : den2;
-            const aktualnyZnak = efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, den);
+            // Pre pôvodných členov použijeme turnus, pre nových len manuálne zmeny
+            const jeNovy = !clen.posun && clen.posun !== 0;
+            const aktualnyZnak = jeNovy
+                ? efektivnyZnakNovy(clen, zobrazenyRok, zobrazenyMesiac, den)
+                : efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, den);
             otvorModal(
                 "Vyber znak",
                 "Pre <strong>" + clen.meno + "</strong>, deň <strong>" + den + "</strong> ("
@@ -1028,7 +995,10 @@
             if (relativnaX < 1 / 3) den = den1;
             else if (relativnaX < 2 / 3) den = den2;
             else den = den3;
-            const aktualnyZnak = efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, den);
+            const jeNovy = !clen.posun && clen.posun !== 0;
+            const aktualnyZnak = jeNovy
+                ? efektivnyZnakNovy(clen, zobrazenyRok, zobrazenyMesiac, den)
+                : efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, den);
             otvorModal(
                 "Vyber znak",
                 "Pre <strong>" + clen.meno + "</strong>, deň <strong>" + den + "</strong> ("
@@ -1050,8 +1020,6 @@
 
         const mojeCislo = ++pocitadloPoziadaviek;
 
-        // Postupné volanie (nie Promise.all) – Apps Script nezvládne
-        // dve súbežné JSONP požiadavky spoľahlivo.
         return nacitajZmenyZoSheets()
             .then(() => new Promise(r => setTimeout(r, 300)))
             .then(() => nacitajNovychClenovZoSheets())
@@ -1070,7 +1038,7 @@
             .finally(() => {
                 nacitavaSa = false;
                 if (!silent) zobrazLoading(false);
-                if (cakajuciRefresh) {
+                if (cakujuciRefresh) {
                     cakajuciRefresh = false;
                     obnovAVykresli(silent);
                 }
