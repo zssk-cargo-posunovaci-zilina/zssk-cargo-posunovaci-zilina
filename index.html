@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZSSK Cargo - posunovači Žilina</title><style>
+    <title>ZSSK Cargo - posunovači Žilina</title>
+<style>
     body { font-family: Arial, sans-serif; padding: 20px; }
     table { border-collapse: collapse; font-size: 12px; }
     th, td {
@@ -143,11 +144,19 @@
     }
     .nav-tlacidla button:hover { background-color: #357abd; }
     .nav-tlacidla button:active { background-color: #2a5f94; }
+    .nav-tlacidla button:disabled { background-color: #a0a0a0; cursor: wait; }
     .nav-tlacidla .aktualny-mesiac {
         font-size: 14px; color: #333; font-weight: bold;
         white-space: nowrap;
         flex-shrink: 0;
     }
+    .nav-tlacidla .loading-indikator {
+        font-size: 12px; color: #4a90d9; font-weight: bold;
+        white-space: nowrap;
+        flex-shrink: 0;
+        display: none;
+    }
+    .nav-tlacidla .loading-indikator.aktivny { display: inline-block; }
 
     .info-dnes {
         display: table-row;
@@ -188,6 +197,7 @@
             <button id="btnPredchadzajuci">◄ Predchádzajúci</button>
             <span class="aktualny-mesiac" id="aktualnyMesiac"></span>
             <button id="btnNasledujuci">Nasledujúci ►</button>
+            <span class="loading-indikator" id="loadingIndikator">⏳ načítavam…</span>
         </div>
     </div>
 
@@ -218,6 +228,11 @@
     const POVOLENE_ZNAKY = ["I", "/", "O", "D", "J", "-", ""];
     const POVOLENE_ZNAKY_TEXT = "I, /, O, D, J, - (pomlčka) alebo prázdne na vymazanie.";
 
+    // Timeout a retry pre JSONP
+    const JSONP_TIMEOUT_MS = 20000;
+    const JSONP_MAX_POKUSOV = 3;
+    const POST_OVERENIE_MS = 3000;
+
     const clenovia = [
         { meno: "Ján Lukáč",        posun: 0 },
         { meno: "Viktor Imrišek",   posun: 1 },
@@ -240,6 +255,11 @@
     let zobrazenyMesiac = dnes.getMonth();
 
     let zmenyDatabaza = [];
+
+    // ===== STAV NAČÍTAVANIA =====
+    let nacitavaSa = false;
+    let cakajuciRefresh = false;   // ak počas načítavania príde ďalšia požiadavka
+    let pocitadloPoziadaviek = 0;  // aby staršie requesty neprepísali novšie
 
     // ===== POMOCNÉ =====
     function dniMedzi(rok1, mes1, den1, rok2, mes2, den2) {
@@ -313,9 +333,6 @@
         }
     }
 
-    /* NOVÉ: určí, či je člen v daný deň "aktívny" pre zvýraznenie.
-       Aktívny je len ak efektívny znak je "I" alebo "/".
-       Pri "/" sa navyše nesmie zobrazovať v dňoch z DNI_BEZ_SIKMOVEJ (Pi, So, Ne). */
     function jeDenAktivny(clen, rok, mesiac, den) {
         const znak = efektivnyZnak(clen, rok, mesiac, den);
         if (znak === "I") return true;
@@ -350,19 +367,53 @@
         td.style.backgroundColor = "transparent";
     }
 
-    function nacitajZmenyZoSheets() {
+    function zobrazLoading(ano) {
+        const el = document.getElementById("loadingIndikator");
+        if (!el) return;
+        if (ano) el.classList.add("aktivny");
+        else el.classList.remove("aktivny");
+        // Vypni/zapni tlačidlá počas načítavania
+        document.getElementById("btnPredchadzajuci").disabled = ano;
+        document.getElementById("btnNasledujuci").disabled = ano;
+    }
+
+    // ===== NAČÍTANIE Z GOOGLE SHEETS (JSONP s retry) =====
+    function nacitajZmenyZoSheets(pokus = 1) {
         return new Promise((resolve) => {
-            const callbackName = "jsonpCb_" + Date.now();
+            const callbackName = "jsonpCb_" + Date.now() + "_" + Math.random().toString(36).slice(2);
             const script = document.createElement("script");
+            let hotovo = false;
+
+            const dokonci = (uspech) => {
+                if (hotovo) return;
+                hotovo = true;
+                clearTimeout(timeout);
+                try { delete window[callbackName]; } catch (e) {}
+                try { script.remove(); } catch (e) {}
+
+                if (uspech) {
+                    resolve();
+                    return;
+                }
+                // Neúspech – skús znova, ak ešte máme pokusy
+                if (pokus < JSONP_MAX_POKUSOV) {
+                    console.warn(`JSONP pokus ${pokus} zlyhal, skúšam znova...`);
+                    // Malý backoff
+                    setTimeout(() => {
+                        nacitajZmenyZoSheets(pokus + 1).then(resolve);
+                    }, 500 * pokus);
+                } else {
+                    console.warn("JSONP: maximálny počet pokusov vyčerpaný.");
+                    resolve();
+                }
+            };
+
             const timeout = setTimeout(() => {
-                console.warn("JSONP timeout – dáta sa nenačítali.");
-                delete window[callbackName];
-                script.remove();
-                resolve();
-            }, 10000);
+                console.warn(`JSONP timeout po ${JSONP_TIMEOUT_MS}ms (pokus ${pokus}).`);
+                dokonci(false);
+            }, JSONP_TIMEOUT_MS);
 
             window[callbackName] = function(data) {
-                clearTimeout(timeout);
                 console.log("Surové dáta z JSONP:", data);
                 try {
                     if (data && !Array.isArray(data) && data.result === "error") {
@@ -392,20 +443,19 @@
                     console.error("Chyba spracovania JSONP:", e);
                     zmenyDatabaza = [];
                 }
-                delete window[callbackName];
-                script.remove();
-                resolve();
+                dokonci(true);
             };
 
             script.onerror = function() {
-                clearTimeout(timeout);
-                console.error("JSONP načítanie zlyhalo.");
-                delete window[callbackName];
-                script.remove();
-                resolve();
+                console.error("JSONP načítanie zlyhalo (onerror).");
+                dokonci(false);
             };
 
-            script.src = API_URL + "?callback=" + callbackName + "&_=" + Date.now();
+            // Anti-cache: unikátny callback + timestamp + random
+            script.src = API_URL
+                + "?callback=" + callbackName
+                + "&_=" + Date.now()
+                + "&r=" + Math.random().toString(36).slice(2);
             document.body.appendChild(script);
         });
     }
@@ -428,9 +478,14 @@
         form.submit();
         document.body.removeChild(form);
         console.log("POST odoslaný:", polia);
+
+        // Po chvíli over, či Google Script zápis naozaj zapísal.
+        // Ak áno, tabuľka sa obnoví s čerstvými dátami.
+        setTimeout(() => {
+            obnovAVykresli(true);
+        }, POST_OVERENIE_MS);
     }
 
-    /* UPRAVENÉ: aktívni sú len tí, čo majú "I" alebo "/" (a "/" nie v Pi/So/Ne) */
     function aktualizujInfoDnes() {
         const vnutro = document.querySelector("#infoDnes > .info-vnutor");
         const den = dnes.getDate();
@@ -495,11 +550,11 @@
             tdMeno.className = "name-col";
             tdMeno.textContent = clen.meno;
 
-            /* UPRAVENÉ: zvýraznenie mena v prvom stĺpci len ak je deň aktívny (I alebo "/" mimo Pi/So/Ne) */
             if (dnesVZobrazenom) {
                 if (jeDenAktivny(clen, zobrazenyRok, zobrazenyMesiac, dnesDen)) {
                     tdMeno.classList.add("name-col-aktivny");
                 }
+                   }
             }
             tr.appendChild(tdMeno);
 
@@ -597,9 +652,26 @@
         aktualizujInfoDnes();
     }
 
-    function pridelKlikHandler(td, clen, den, aktualnyZnak) {
+    // ===== POMOCNÁ FUNKCIA: zapíš zmenu do DB + POST + refresh =====
+    function zapisZmenu(clen, den, znak) {
         const datumStr = datumString(zobrazenyRok, zobrazenyMesiac, den);
 
+        // Okamžitá lokálna aktualizácia (aby UI reagovalo hneď)
+        zmenyDatabaza = zmenyDatabaza.filter(
+            z => !(z.datum === datumStr && z.meno === clen.meno)
+        );
+        zmenyDatabaza.push({
+            datum: datumStr, meno: clen.meno, den: den, novyZnak: znak
+        });
+
+        // Pošli na server (POST) – po 3s sa overí a obnoví z reálnych dát
+        ulozZmenuDoSheets(datumStr, clen.meno, den, znak);
+
+        // Okamžité prekreslenie s lokálnou zmenou
+        vykresliTabulku();
+    }
+
+    function pridelKlikHandler(td, clen, den, aktualnyZnak) {
         td.style.cursor = "pointer";
         td.title = (td.title ? td.title + " | " : "") +
             "Klikni pre zmenu. Aktuálne: '" + (aktualnyZnak || "prázdne") + "'";
@@ -617,16 +689,7 @@
                 alert("Neplatný znak. Povolené: " + POVOLENE_ZNAKY_TEXT);
                 return;
             }
-
-            zmenyDatabaza = zmenyDatabaza.filter(
-                z => !(z.datum === datumStr && z.meno === clen.meno)
-            );
-            zmenyDatabaza.push({
-                datum: datumStr, meno: clen.meno, den: den, novyZnak: znak
-            });
-
-            ulozZmenuDoSheets(datumStr, clen.meno, den, znak);
-            vykresliTabulku();
+            zapisZmenu(clen, den, znak);
         });
     }
 
@@ -640,7 +703,6 @@
             const relativnaX = (event.clientX - rect.left) / rect.width;
             const den = (relativnaX < 0.5) ? den1 : den2;
 
-            const datumStr = datumString(zobrazenyRok, zobrazenyMesiac, den);
             const aktualnyZnak = efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, den);
 
             const novy = prompt(
@@ -655,16 +717,7 @@
                 alert("Neplatný znak. Povolené: " + POVOLENE_ZNAKY_TEXT);
                 return;
             }
-
-            zmenyDatabaza = zmenyDatabaza.filter(
-                z => !(z.datum === datumStr && z.meno === clen.meno)
-            );
-            zmenyDatabaza.push({
-                datum: datumStr, meno: clen.meno, den: den, novyZnak: znak
-            });
-
-            ulozZmenuDoSheets(datumStr, clen.meno, den, znak);
-            vykresliTabulku();
+            zapisZmenu(clen, den, znak);
         });
     }
 
@@ -681,7 +734,6 @@
             else if (relativnaX < 2 / 3) den = den2;
             else den = den3;
 
-            const datumStr = datumString(zobrazenyRok, zobrazenyMesiac, den);
             const aktualnyZnak = efektivnyZnak(clen, zobrazenyRok, zobrazenyMesiac, den);
 
             const novy = prompt(
@@ -696,34 +748,56 @@
                 alert("Neplatný znak. Povolené: " + POVOLENE_ZNAKY_TEXT);
                 return;
             }
-
-            zmenyDatabaza = zmenyDatabaza.filter(
-                z => !(z.datum === datumStr && z.meno === clen.meno)
-            );
-            zmenyDatabaza.push({
-                datum: datumStr, meno: clen.meno, den: den, novyZnak: znak
-            });
-
-            ulozZmenuDoSheets(datumStr, clen.meno, den, znak);
-            vykresliTabulku();
+            zapisZmenu(clen, den, znak);
         });
     }
 
+    // ===== HLAVNÝ REFRESH: načítaj z Google Sheet a prekresli =====
+    function obnovAVykresli(silent = false) {
+        // Ak už prebieha načítavanie, označ, že po ňom treba ešte raz obnoviť
+        if (nacitavaSa) {
+            cakajuciRefresh = true;
+            return Promise.resolve();
+        }
+        nacitavaSa = true;
+        cakajuciRefresh = false;
+        if (!silent) zobrazLoading(true);
+
+        const mojeCislo = ++pocitadloPoziadaviek;
+
+        return nacitajZmenyZoSheets()
+            .then(() => {
+                // Ak medzitým prišla novšia požiadavka, túto ignoruj
+                if (mojeCislo !== pocitadloPoziadaviek) return;
+                vykresliTabulku();
+            })
+            .finally(() => {
+                nacitavaSa = false;
+                if (!silent) zobrazLoading(false);
+
+                // Ak počas načítavania prišla ďalšia požiadavka, spusti ju teraz
+                if (cakajuciRefresh) {
+                    cakajuciRefresh = false;
+                    obnovAVykresli(silent);
+                }
+            });
+    }
+
+    // ===== NAVIGAČNÉ TLAČIDLÁ =====
     document.getElementById("btnPredchadzajuci").addEventListener("click", () => {
         zobrazenyMesiac--;
         if (zobrazenyMesiac < 0) { zobrazenyMesiac = 11; zobrazenyRok--; }
-        vykresliTabulku();
+        obnovAVykresli();
     });
     document.getElementById("btnNasledujuci").addEventListener("click", () => {
         zobrazenyMesiac++;
         if (zobrazenyMesiac > 11) { zobrazenyMesiac = 0; zobrazenyRok++; }
-        vykresliTabulku();
+        obnovAVykresli();
     });
 
+    // ===== ŠTART =====
     document.addEventListener("DOMContentLoaded", () => {
-        nacitajZmenyZoSheets().then(() => {
-            vykresliTabulku();
-        });
+        obnovAVykresli();
     });
 </script>
 
