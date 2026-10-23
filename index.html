@@ -407,9 +407,13 @@
     function najdiManualnuZmenu(meno, rok, mesiac, den) {
         const datumStr = datumString(rok, mesiac, den);
         const hladaneMeno = normalizujMeno(meno);
-        return [...zmenyDatabaza].reverse().find(
-            z => z.datum === datumStr && normalizujMeno(z.meno) === hladaneMeno
-        );
+        return [...zmenyDatabaza].reverse().find(z => {
+            if (normalizujMeno(z.meno) !== hladaneMeno) return false;
+            // Ak zmena má platný dátum, porovnávame presne.
+            if (z.datum) return z.datum === datumStr;
+            // Ak zmena nemá dátum (starý zápis), porovnávame len číslo dňa.
+            return Number(z.den) === Number(den);
+        });
     }
 
     function znakPreDen(clen, rok, mesiac, den) {
